@@ -30,3 +30,4 @@ C:\Users\zack\.vscode\codeForSchool\monogame\monogame\monogame\obj\Debug\net8.0\
 C:\Users\zack\.vscode\codeForSchool\monogame\monogame\monogame\obj\Debug\net8.0\monogame.genruntimeconfig.cache
 C:\Users\zack\.vscode\codeForSchool\monogame\monogame\monogame\obj\Debug\net8.0\ref\monogame.dll
 C:\Users\zack\.vscode\codeForSchool\monogame\monogame\monogame\bin\Debug\net8.0\Content\blacksquare.xnb
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\monogame\obj\Debug\net8.0\monogame.sourcelink.json
