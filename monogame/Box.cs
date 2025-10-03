@@ -85,7 +85,7 @@ public class BoxObject
 {
     get
     {
-        return new Rectangle(
+        return new Rectangle(   
             (int)(_position.X - _bounds.Width / 2), //left side
             (int)(_position.Y - _bounds.Height / 2),//top side
             _bounds.Width, //right side
