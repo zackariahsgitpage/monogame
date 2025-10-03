@@ -1,4 +1,6 @@
+using System;
 using System.Diagnostics.Metrics;
+using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -13,12 +15,16 @@ public class BoxObject
     private Vector2 _mousePointBeforeRelease;
     private Vector2 _mousePointAfterRelease;
 
-    private decimal gravity;
-  public decimal verticalVelocity;
-    public decimal horizontalVelocity;
+    private float gravity;
+  public float verticalVelocity;
+    public float horizontalVelocity;
 
     private float rotation;
     private bool edgeTrigger;
+    private bool isMoving;
+    private float resolvedSpeed;
+    private float coefficientOfFriction;
+    private float normalReactionForce;
 
     public BoxObject(Texture2D texture, Vector2 initialPosition)
     {
@@ -30,12 +36,18 @@ public class BoxObject
         horizontalVelocity = 0;
         edgeTrigger = false;
         rotation = 0f;
+        isMoving = false;
+        resolvedSpeed = 0;
     }
 
     public void Update(GameWindow window)
     {
         MouseState mouse = Mouse.GetState();
-
+        resolvedSpeed = (float)Math.Sqrt(verticalVelocity*verticalVelocity+horizontalVelocity*horizontalVelocity);
+        if (verticalVelocity > 0 || horizontalVelocity > 0)
+        { isMoving = true; }
+        else
+        { isMoving = false; }
         if (mouse.LeftButton == ButtonState.Pressed)
         {
             _position.X = mouse.X;
@@ -49,8 +61,8 @@ public class BoxObject
         {
             _mousePointAfterRelease.X = mouse.X;
             _mousePointAfterRelease.Y = mouse.Y;
-            verticalVelocity += (decimal)(_mousePointAfterRelease.Y - _mousePointBeforeRelease.Y) / 5;
-            horizontalVelocity += (decimal)(_mousePointAfterRelease.X - _mousePointBeforeRelease.X) / 5;
+            verticalVelocity += (float)(_mousePointAfterRelease.Y - _mousePointBeforeRelease.Y) / 5;
+            horizontalVelocity += (float)(_mousePointAfterRelease.X - _mousePointBeforeRelease.X) / 5;
             edgeTrigger = false;
         }
 
@@ -80,19 +92,22 @@ public class BoxObject
         {
             horizontalVelocity = 0;
         }
+        
     }
     public Rectangle BoundingBox
-{
-    get
     {
-        return new Rectangle(   
-            (int)(_position.X - _bounds.Width / 2), //left side
-            (int)(_position.Y - _bounds.Height / 2),//top side
-            _bounds.Width, //right side
-            _bounds.Height //bottom side
-        );
+        get
+        {
+            return new Rectangle(
+                (int)(_position.X - _bounds.Width / 2), //left side
+                (int)(_position.Y - _bounds.Height / 2),//top side
+                _bounds.Width, //right side
+                _bounds.Height //bottom side
+            );
+        }
+        
     }
-}
+
 
 
     public void Draw(SpriteBatch spriteBatch)
