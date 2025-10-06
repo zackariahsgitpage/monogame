@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using monogame;
 
 
 public class BoxObject
@@ -15,16 +16,18 @@ public class BoxObject
     private Vector2 _mousePointBeforeRelease;
     private Vector2 _mousePointAfterRelease;
 
-    private float gravity;
+    public float gravity;
+    public float horizontalAcceleration;
   public float verticalVelocity;
     public float horizontalVelocity;
+    public float forceFromFriction;
+    public float coefficientOfFriction;
 
     private float rotation;
     private bool edgeTrigger;
     private bool isMoving;
     private float resolvedSpeed;
-    private float coefficientOfFriction;
-    private float normalReactionForce;
+    public float normalReactionForce;
 
     public BoxObject(Texture2D texture, Vector2 initialPosition)
     {
@@ -38,6 +41,9 @@ public class BoxObject
         rotation = 0f;
         isMoving = false;
         resolvedSpeed = 0;
+        normalReactionForce = 0;
+        coefficientOfFriction = 0.1f;
+        forceFromFriction = 0;
     }
 
     public void Update(GameWindow window)

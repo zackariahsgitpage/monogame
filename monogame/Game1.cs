@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Metrics;
+﻿using System;
+using System.Diagnostics.Metrics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -13,9 +14,7 @@ public class Game1 : Game
     private BoxObject _box;
     Texture2D _BlackTexture;
     Rectangle _LineObject;
-  
- 
-    
+    float tempVelocity;
 
     public Game1()
     {
@@ -27,7 +26,8 @@ public class Game1 : Game
     protected override void Initialize()
     {
         // TODO: Add your initialization logic here
-        base.Initialize();
+        
+        base.Initialize();  
     }
 
     protected override void LoadContent()
@@ -42,13 +42,19 @@ public class Game1 : Game
     protected override void Update(GameTime gameTime)
     {
        _box.Update(Window);
+
         if (_box.BoundingBox.Intersects(_LineObject))
         {
-        _box.verticalVelocity = 0;
-       }
+            _box.verticalVelocity = 0;
+            _box.normalReactionForce = _box.gravity;
+            _box.forceFromFriction = (_box.normalReactionForce * _box.coefficientOfFriction) / 10;
+            tempVelocity = Math.Max(0, Math.Abs(_box.horizontalVelocity) - _box.forceFromFriction);
+            _box.horizontalVelocity = Math.Sign(_box.horizontalVelocity) * tempVelocity;
+        }
+       
         // TODO: Add your update logic here
 
-            base.Update(gameTime);
+        base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
