@@ -28,6 +28,7 @@ public class BoxObject
     private bool isMoving;
     private float resolvedSpeed;
     public float normalReactionForce;
+    public float mass;
 
     public BoxObject(Texture2D texture, Vector2 initialPosition)
     {
@@ -44,6 +45,7 @@ public class BoxObject
         normalReactionForce = 0;
         coefficientOfFriction = 0.1f;
         forceFromFriction = 0;
+        mass = 1;
     }
 
     public void Update(GameWindow window)
@@ -74,7 +76,7 @@ public class BoxObject
 
         if (_position.Y + _bounds.Height / 2 < window.ClientBounds.Height && mouse.LeftButton == ButtonState.Released)
         {
-            verticalVelocity += gravity / 60;
+            verticalVelocity += mass*(gravity / 60);
 
             if (verticalVelocity < 0 && (_position.Y - _bounds.Height / 2) < 0)
             {

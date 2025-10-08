@@ -15,6 +15,8 @@ public class Game1 : Game
     Texture2D _BlackTexture;
     Rectangle _LineObject;
     float tempVelocity;
+    float lineRotation;
+    Vector2 positionOfLine;
 
     public Game1()
     {
@@ -26,7 +28,8 @@ public class Game1 : Game
     protected override void Initialize()
     {
         // TODO: Add your initialization logic here
-        
+        positionOfLine=new Vector2(200, 400);
+        lineRotation = -MathHelper.ToRadians(60);
         base.Initialize();  
     }
 
@@ -46,7 +49,7 @@ public class Game1 : Game
         if (_box.BoundingBox.Intersects(_LineObject))
         {
             _box.verticalVelocity = 0;
-            _box.normalReactionForce = _box.gravity;
+            _box.normalReactionForce = (float)(_box.gravity*_box.mass*Math.Abs(Math.Cos(lineRotation)));
             _box.forceFromFriction = (_box.normalReactionForce * _box.coefficientOfFriction) / 10;
             tempVelocity = Math.Max(0, Math.Abs(_box.horizontalVelocity) - _box.forceFromFriction);
             _box.horizontalVelocity = Math.Sign(_box.horizontalVelocity) * tempVelocity;
@@ -61,8 +64,17 @@ public class Game1 : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
         _spriteBatch.Begin();
-        //_spriteBatch.Draw(_BlackTexture,new Vector2(0,400),_LineObject,Color.Black, 0, new Vector2(_LineObject.Width/2,_LineObject.Height/2),1.0f,SpriteEffects.None,0f);
-        _spriteBatch.Draw(_BlackTexture, _LineObject, Color.Black);
+        //_spriteBatch.Draw(_BlackTexture, _LineObject, Color.Black);
+        _spriteBatch.Draw(
+             _BlackTexture,
+            positionOfLine,
+            _LineObject,
+            Color.Black,
+            lineRotation,
+            new Vector2(0,0),
+            1.0f,
+            SpriteEffects.None,
+            0f);
        _box.Draw(_spriteBatch);
         _spriteBatch.End();
         // TODO: Add your drawing code here
