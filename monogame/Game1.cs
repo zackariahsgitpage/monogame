@@ -13,7 +13,7 @@ public class Game1 : Game
     private SpriteBatch _spriteBatch;
     private BoxObject _box;
     Texture2D _BlackTexture;
-    Rectangle _LineObject;
+    LineObject _line;
     float tempVelocity;
     float lineRotation;
     Vector2 positionOfLine;
@@ -38,7 +38,7 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _BlackTexture = Content.Load<Texture2D>("blacksquare");
         _box = new BoxObject(_BlackTexture, new Vector2(0, 0));
-        _LineObject = new Rectangle(0, 400, 400, 10);
+        _line = new LineObject(_BlackTexture, new Vector2(200,400), new Rectangle(0, 0, 400, 10), lineRotation);
         // TODO: use this.Content to load your game content here
     }
 
@@ -46,11 +46,11 @@ public class Game1 : Game
     {
        _box.Update(Window);
 
-        if (_box.BoundingBox.Intersects(_LineObject))
+        if (_box.BoundingBox.Intersects(_line.BoundingBox))
         {
             _box.verticalVelocity = 0;
             _box.normalReactionForce = (float)(_box.gravity*_box.mass*Math.Abs(Math.Cos(lineRotation)));
-            _box.forceFromFriction = (_box.normalReactionForce * _box.coefficientOfFriction) / 10;
+            _box.forceFromFriction = (_box.normalReactionForce * _box.coefficientOfFriction);
             tempVelocity = Math.Max(0, Math.Abs(_box.horizontalVelocity) - _box.forceFromFriction);
             _box.horizontalVelocity = Math.Sign(_box.horizontalVelocity) * tempVelocity;
         }
@@ -68,7 +68,7 @@ public class Game1 : Game
         _spriteBatch.Draw(
              _BlackTexture,
             positionOfLine,
-            _LineObject,
+            _line.SourceRect,
             Color.Black,
             lineRotation,
             new Vector2(0,0),

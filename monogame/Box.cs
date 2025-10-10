@@ -12,7 +12,7 @@ public class BoxObject
 
     private Texture2D _texture;
     private Rectangle _bounds;
-    private Vector2 _position;
+    private Vector2 _centreOfBox;
     private Vector2 _mousePointBeforeRelease;
     private Vector2 _mousePointAfterRelease;
 
@@ -34,7 +34,7 @@ public class BoxObject
     {
         _texture = texture;
         _bounds = new Rectangle(0, 0, 100, 100);
-        _position = initialPosition;
+        _centreOfBox = initialPosition;
         gravity = 20;
         verticalVelocity = 0;
         horizontalVelocity = 0;
@@ -51,15 +51,15 @@ public class BoxObject
     public void Update(GameWindow window)
     {
         MouseState mouse = Mouse.GetState();
-        resolvedSpeed = (float)Math.Sqrt(verticalVelocity*verticalVelocity+horizontalVelocity*horizontalVelocity);
+        resolvedSpeed = (float)Math.Sqrt(verticalVelocity * verticalVelocity + horizontalVelocity * horizontalVelocity);
         if (verticalVelocity > 0 || horizontalVelocity > 0)
         { isMoving = true; }
         else
         { isMoving = false; }
         if (mouse.LeftButton == ButtonState.Pressed)
         {
-            _position.X = mouse.X;
-            _position.Y = mouse.Y;
+            _centreOfBox.X = mouse.X;
+            _centreOfBox.Y = mouse.Y;
             _mousePointBeforeRelease.X = mouse.X;
             _mousePointBeforeRelease.Y = mouse.Y;
             edgeTrigger = true;
@@ -74,41 +74,65 @@ public class BoxObject
             edgeTrigger = false;
         }
 
-        if (_position.Y + _bounds.Height / 2 < window.ClientBounds.Height && mouse.LeftButton == ButtonState.Released)
+        if (_centreOfBox.Y + _bounds.Height / 2 < window.ClientBounds.Height && mouse.LeftButton == ButtonState.Released)
         {
-            verticalVelocity += mass*(gravity / 60);
+            verticalVelocity += mass * (gravity / 60);
 
-            if (verticalVelocity < 0 && (_position.Y - _bounds.Height / 2) < 0)
+            if (verticalVelocity < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)
             {
                 verticalVelocity = 0;
             }
 
-            _position.Y += (int)verticalVelocity;
+            _centreOfBox.Y += (int)verticalVelocity;
         }
         else
         {
             verticalVelocity = 0;
         }
 
-        if (_position.X + _bounds.Width / 2 < window.ClientBounds.Width &&
-            _position.X - _bounds.Width / 2 > 0 &&
+        if (_centreOfBox.X + _bounds.Width / 2 < window.ClientBounds.Width &&
+            _centreOfBox.X - _bounds.Width / 2 > 0 &&
             mouse.LeftButton == ButtonState.Released)
         {
-            _position.X += (int)horizontalVelocity;
+            _centreOfBox.X += (int)horizontalVelocity;
         }
         else
         {
             horizontalVelocity = 0;
         }
-        
+
+    }
+    public Vector2[] GetCorners()
+    {
+        float halfWidth = _bounds.Width / 2f;
+        float halfHeight = _bounds.Height / 2f;
+        float cos = (float)Math.Cos(rotation);
+        float sin = (float)Math.Sin(rotation);
+
+        Vector2[] localCorners = new Vector2[]
+        {
+            new Vector2(-halfWidth, -halfHeight), // Top-left
+            new Vector2(halfWidth, -halfHeight),  // Top-right
+            new Vector2(halfWidth, halfHeight),   // Bottom-right
+            new Vector2(-halfWidth, halfHeight),  // Bottom-left
+        };
+        Vector2[] worldCorners = new Vector2[4];
+        for (int i = 0; i < 4; i++)
+        {
+            worldCorners[i] = _centreOfBox + new Vector2(
+                localCorners[i].X * cos - localCorners[i].Y * sin,
+                localCorners[i].X * sin + localCorners[i].Y * cos
+            );
+        }
+        return worldCorners;
     }
     public Rectangle BoundingBox
     {
         get
         {
             return new Rectangle(
-                (int)(_position.X - _bounds.Width / 2), //left side
-                (int)(_position.Y - _bounds.Height / 2),//top side
+                (int)(_centreOfBox.X - _bounds.Width / 2), //left side
+                (int)(_centreOfBox.Y - _bounds.Height / 2),//top side
                 _bounds.Width, //right side
                 _bounds.Height //bottom side
             );
@@ -122,7 +146,7 @@ public class BoxObject
     {
         spriteBatch.Draw(
             _texture,
-            _position,
+            _centreOfBox,
             _bounds,
             Color.Black,
             rotation,
