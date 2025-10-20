@@ -122,6 +122,7 @@ public class BoxObject
             worldCorners[i] = _centreOfBox + new Vector2(
                 localCorners[i].X * cos - localCorners[i].Y * sin,
                 localCorners[i].X * sin + localCorners[i].Y * cos
+                
             );
         }
         return worldCorners;
