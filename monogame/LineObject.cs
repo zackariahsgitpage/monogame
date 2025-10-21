@@ -20,14 +20,8 @@ public class LineObject
         SourceRect = sourceRect;
         Rotation = rotation;
     }
-    public static class SATHelper
-    {
-        
-     public static bool IsColliding(Vector2[] CornersA)
-    }
+  
 
-    // Axis-aligned bounding box at the line's drawn position (ignores rotation for simplicity,
-    // matching the original approach which used a Rectangle for intersection)
     public Rectangle BoundingBox
     {
         get

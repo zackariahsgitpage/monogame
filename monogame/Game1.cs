@@ -17,7 +17,38 @@ public class Game1 : Game
     float tempVelocity;
     float lineRotation;
     Vector2 positionOfLine;
+    Vector2[] axes;
+    
 
+  public static class SATHelper
+    {
+        public static float[] ProjectOntoAxis(Vector2[] worldCorners, Vector2 axis)
+        {
+            float min = float.PositiveInfinity;
+            float max = float.NegativeInfinity;
+            foreach (var corner in worldCorners)
+            {
+                float projection = Vector2.Dot(corner, axis);
+                if (projection < min) min = projection;
+                if (projection > max) max = projection;
+            }
+            return new float[] { min, max };
+        }
+        public static bool IsColliding(Vector2[] CornersA, Vector2[] CornersB, Vector2[] axes)
+        {
+            foreach (var axis in axes)
+            {
+                float[] projectionA = ProjectOntoAxis(CornersA, axis);
+                float[] projectionB = ProjectOntoAxis(CornersB, axis);
+
+                if (projectionA[1] < projectionB[0] || projectionB[1] < projectionA[0])
+                {
+                    return false; // Found a separating axis
+                }
+            }
+            return true; // No separating axis found, collision detected
+        }
+    }
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -29,7 +60,14 @@ public class Game1 : Game
     {
         // TODO: Add your initialization logic here
         positionOfLine=new Vector2(200, 400);
-        lineRotation = -MathHelper.ToRadians(60);
+        lineRotation = -MathHelper.ToRadians(0);
+        axes = new Vector2[]
+        {
+            new Vector2((float)Math.Cos(lineRotation), (float)Math.Sin(lineRotation)),
+            new Vector2(-(float)Math.Sin(lineRotation), (float)Math.Cos(lineRotation)),
+            new Vector2(1,0),
+            new Vector2(0,1)
+        };
         base.Initialize();  
     }
 
@@ -46,7 +84,7 @@ public class Game1 : Game
     {
        _box.Update(Window);
 
-        if (_box.BoundingBox.Intersects(_line.BoundingBox))
+        if (SATHelper.IsColliding(_box.GetCorners(),_line.GetCorners(), axes))
         {
             _box.verticalVelocity = 0;
             _box.normalReactionForce = (float)(_box.gravity*_box.mass*Math.Abs(Math.Cos(lineRotation)));
