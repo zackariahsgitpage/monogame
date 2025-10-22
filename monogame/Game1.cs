@@ -34,19 +34,33 @@ public class Game1 : Game
             }
             return new float[] { min, max };
         }
-        public static bool IsColliding(Vector2[] CornersA, Vector2[] CornersB, Vector2[] axes)
+        public static (bool IsColliding, Vector2 MTV) CollisionData(Vector2[] CornersA, Vector2[] CornersB, Vector2[] axes)
         {
             foreach (var axis in axes)
             {
+                float smallestOverlap = float.PositiveInfinity;
+                Vector2 smallestAxis = Vector2.Zero;
                 float[] projectionA = ProjectOntoAxis(CornersA, axis);
                 float[] projectionB = ProjectOntoAxis(CornersB, axis);
 
                 if (projectionA[1] < projectionB[0] || projectionB[1] < projectionA[0])
                 {
-                    return false; // Found a separating axis
+                    return (false, Vector2.Zero); // Found a separating axis
+                }
+                float overlap = Math.Min(projectionA[1], projectionB[1]) - Math.Max(projectionA[0], projectionB[0]);
+                if (overlap < smallestOverlap)
+                {
+                    smallestOverlap = overlap;
+                    smallestAxis = axis;
                 }
             }
-            return true; // No separating axis found, collision detected
+            Vector2 direction = CornersB[0] - CornersA[0];
+            if (Vector2.Dot(direction, smallestAxis) < 0)
+            {
+                smallestAxis *= -1;
+            }
+            Vector2 mtv = smallestAxis * smallestOverlap;
+            return (true, mtv);
         }
     }
     public Game1()
@@ -76,7 +90,8 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _BlackTexture = Content.Load<Texture2D>("blacksquare");
         _box = new BoxObject(_BlackTexture, new Vector2(0, 0));
-        _line = new LineObject(_BlackTexture, new Vector2(200,400), new Rectangle(0, 0, 400, 10), lineRotation);
+        _line = new LineObject(_BlackTexture, new Vector2(200, 400), new Rectangle(0, 0, 400, 10), lineRotation);
+        _line.Origin = new Vector2(_line.SourceRect.Width / 2f, _line.SourceRect.Height / 2f);
         // TODO: use this.Content to load your game content here
     }
 
@@ -86,7 +101,7 @@ public class Game1 : Game
 
         if (SATHelper.IsColliding(_box.GetCorners(),_line.GetCorners(), axes))
         {
-            _box.verticalVelocity = 0;
+            _box.verticalVelocity -= _box.verticalVelocity*0.5f+ _box.verticalVelocity;
             _box.normalReactionForce = (float)(_box.gravity*_box.mass*Math.Abs(Math.Cos(lineRotation)));
             _box.forceFromFriction = (_box.normalReactionForce * _box.coefficientOfFriction);
             tempVelocity = Math.Max(0, Math.Abs(_box.horizontalVelocity) - _box.forceFromFriction);
@@ -103,16 +118,17 @@ public class Game1 : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
         _spriteBatch.Begin();
         //_spriteBatch.Draw(_BlackTexture, _LineObject, Color.Black);
-        _spriteBatch.Draw(
-             _BlackTexture,
-            positionOfLine,
-            _line.SourceRect,
-            Color.Black,
-            lineRotation,
-            new Vector2(0,0),
-            1.0f,
-            SpriteEffects.None,
-            0f);
+        _line.Draw(_spriteBatch);
+       // _spriteBatch.Draw(
+           //  _BlackTexture,
+           // positionOfLine,
+           // _line.SourceRect,
+           // Color.Black,
+           // lineRotation,
+           // new Vector2(0,0),
+           // 1.0f,
+           // SpriteEffects.None,
+           // 0f);
        _box.Draw(_spriteBatch);
         _spriteBatch.End();
         // TODO: Add your drawing code here

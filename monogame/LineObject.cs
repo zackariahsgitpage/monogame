@@ -26,11 +26,13 @@ public class LineObject
     {
         get
         {
+              float halfWidth = SourceRect.Width * Scale / 2f;
+              float halfHeight = SourceRect.Height * Scale / 2f;
             return new Rectangle(
                 (int)Position.X,
                 (int)Position.Y,
-                (int)(SourceRect.Width * Scale),
-                (int)(SourceRect.Height * Scale)
+                (int)(halfWidth * Scale),
+                (int)(halfHeight * Scale)
             );
         }
     }
@@ -51,7 +53,7 @@ public class LineObject
             new Vector2(-halfWidth, halfHeight)
         };
 
-        Vector2 center = Position + Origin;
+        Vector2 center = Position;
         Vector2[] worldCorners = new Vector2[4];
         for (int i = 0; i < 4; i++)
         {
