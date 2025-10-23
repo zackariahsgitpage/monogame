@@ -53,11 +53,11 @@ public class LineObject
             new Vector2(-halfWidth, halfHeight)
         };
 
-        Vector2 center = Position;
+        Vector2 centre = Position;
         Vector2[] worldCorners = new Vector2[4];
         for (int i = 0; i < 4; i++)
         {
-            worldCorners[i] = center + new Vector2(
+            worldCorners[i] = centre + new Vector2(
                 localCorners[i].X * cos - localCorners[i].Y * sin,
                 localCorners[i].X * sin + localCorners[i].Y * cos
             );

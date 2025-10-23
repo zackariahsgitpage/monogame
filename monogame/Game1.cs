@@ -36,10 +36,10 @@ public class Game1 : Game
         }
         public static (bool IsColliding, Vector2 MTV) CollisionData(Vector2[] CornersA, Vector2[] CornersB, Vector2[] axes)
         {
+            float smallestOverlap = float.PositiveInfinity;
+                Vector2 smallestAxis = Vector2.Zero;
             foreach (var axis in axes)
             {
-                float smallestOverlap = float.PositiveInfinity;
-                Vector2 smallestAxis = Vector2.Zero;
                 float[] projectionA = ProjectOntoAxis(CornersA, axis);
                 float[] projectionB = ProjectOntoAxis(CornersB, axis);
 
@@ -55,9 +55,13 @@ public class Game1 : Game
                 }
             }
             Vector2 direction = CornersB[0] - CornersA[0];
-            if (Vector2.Dot(direction, smallestAxis) < 0)
+            if (smallestAxis.LengthSquared() > 0f)
             {
-                smallestAxis *= -1;
+                if (Vector2.Dot(direction, smallestAxis) < 0)
+                {
+                    smallestAxis *= -1;
+                }
+                    smallestAxis.Normalize();
             }
             Vector2 mtv = smallestAxis * smallestOverlap;
             return (true, mtv);
@@ -97,38 +101,42 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
-       _box.Update(Window);
+        _box.Update(Window);
+        var result = SATHelper.CollisionData(_box.GetCorners(), _line.GetCorners(), axes);
 
-        if (SATHelper.IsColliding(_box.GetCorners(),_line.GetCorners(), axes))
+        if (result.IsColliding)
         {
-            _box.verticalVelocity -= _box.verticalVelocity*0.5f+ _box.verticalVelocity;
-            _box.normalReactionForce = (float)(_box.gravity*_box.mass*Math.Abs(Math.Cos(lineRotation)));
-            _box.forceFromFriction = (_box.normalReactionForce * _box.coefficientOfFriction);
+            Vector2 mtv = result.MTV;
+            _box.Translate(-mtv);
+            if (Vector2.Dot(mtv, axes[2]) < Vector2.Dot(mtv, axes[3]))
+            {
+                _box.verticalVelocity -= _box.verticalVelocity + _box.verticalVelocity * 0.1f;
+            }
+            _box.gravityEffectOnBox = false;
+            _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
+            _box.forceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
             tempVelocity = Math.Max(0, Math.Abs(_box.horizontalVelocity) - _box.forceFromFriction);
             _box.horizontalVelocity = Math.Sign(_box.horizontalVelocity) * tempVelocity;
         }
-       
-        // TODO: Add your update logic here
+        else
+        {
+            _box.gravityEffectOnBox = true;
+        }
+        {
 
-        base.Update(gameTime);
+
+            // TODO: Add your update logic here
+
+            base.Update(gameTime);
+        }
     }
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
         _spriteBatch.Begin();
-        //_spriteBatch.Draw(_BlackTexture, _LineObject, Color.Black);
         _line.Draw(_spriteBatch);
-       // _spriteBatch.Draw(
-           //  _BlackTexture,
-           // positionOfLine,
-           // _line.SourceRect,
-           // Color.Black,
-           // lineRotation,
-           // new Vector2(0,0),
-           // 1.0f,
-           // SpriteEffects.None,
-           // 0f);
+       
        _box.Draw(_spriteBatch);
         _spriteBatch.End();
         // TODO: Add your drawing code here

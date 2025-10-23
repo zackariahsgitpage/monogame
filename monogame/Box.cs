@@ -29,13 +29,16 @@ public class BoxObject
     private float resolvedSpeed;
     public float normalReactionForce;
     public float mass;
+    public float boxScale { get; set; } = 1f;
+    public bool gravityEffectOnBox;
+    public float gravityScale { get; set; } = 0.03f;
 
     public BoxObject(Texture2D texture, Vector2 initialPosition)
     {
         _texture = texture;
         _bounds = new Rectangle(0, 0, 100, 100);
         _centreOfBox = initialPosition;
-        gravity = 20;
+        gravity = 10;
         verticalVelocity = 0;
         horizontalVelocity = 0;
         edgeTrigger = false;
@@ -43,9 +46,10 @@ public class BoxObject
         isMoving = false;
         resolvedSpeed = 0;
         normalReactionForce = 0;
-        coefficientOfFriction = 0.1f;
+        coefficientOfFriction = 0.05f;
         forceFromFriction = 0;
         mass = 1;
+        gravityEffectOnBox = true;
     }
 
     public void Update(GameWindow window)
@@ -76,7 +80,10 @@ public class BoxObject
 
         if (_centreOfBox.Y + _bounds.Height / 2 < window.ClientBounds.Height && mouse.LeftButton == ButtonState.Released)
         {
-            verticalVelocity += mass * (gravity / 60);
+            if (gravityEffectOnBox)
+            {
+                verticalVelocity += mass * (gravity * gravityScale);
+            }
 
             if (verticalVelocity < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)
             {
@@ -102,10 +109,14 @@ public class BoxObject
         }
 
     }
+    public void Translate(Vector2 vectorToTranslateBy)
+    {
+        _centreOfBox += vectorToTranslateBy;
+    }
     public Vector2[] GetCorners()
     {
-        float halfWidth = _bounds.Width / 2f;
-        float halfHeight = _bounds.Height / 2f;
+        float halfWidth = _bounds.Width *boxScale / 2f;
+        float halfHeight = _bounds.Height *boxScale / 2f;
         float cos = (float)Math.Cos(rotation);
         float sin = (float)Math.Sin(rotation);
 
@@ -121,8 +132,7 @@ public class BoxObject
         {
             worldCorners[i] = _centreOfBox + new Vector2(
                 localCorners[i].X * cos - localCorners[i].Y * sin,
-                localCorners[i].X * sin + localCorners[i].Y * cos
-                
+                localCorners[i].X * sin + localCorners[i].Y * cos 
             );
         }
         return worldCorners;
