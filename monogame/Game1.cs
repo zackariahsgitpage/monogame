@@ -24,6 +24,7 @@ public class Game1 : Game
     {
         public static float[] ProjectOntoAxis(Vector2[] worldCorners, Vector2 axis)
         {
+            axis.Normalize();
             float min = float.PositiveInfinity;
             float max = float.NegativeInfinity;
             foreach (var corner in worldCorners)
@@ -70,8 +71,11 @@ public class Game1 : Game
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
+        _graphics.PreferredBackBufferWidth = 1024; 
+        _graphics.PreferredBackBufferHeight = 768;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+
     }
 
     protected override void Initialize()
@@ -102,21 +106,33 @@ public class Game1 : Game
     protected override void Update(GameTime gameTime)
     {
         _box.Update(Window);
+        axes[0] = new Vector2((float)Math.Cos(lineRotation), (float)Math.Sin(lineRotation));   
+        axes[1] = new Vector2(-(float)Math.Sin(lineRotation), (float)Math.Cos(lineRotation));  
+        axes[2] = new Vector2(1, 0);  
+        axes[3] = new Vector2(0, 1);  
         var result = SATHelper.CollisionData(_box.GetCorners(), _line.GetCorners(), axes);
 
         if (result.IsColliding)
         {
             Vector2 mtv = result.MTV;
-            _box.Translate(-mtv);
+            if (Vector2.Dot(mtv, _box.Position - _line.Position) < 0)
+            {
+                mtv = -mtv;
+            }
+            _box.Translate(mtv);
+            _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
             if (Vector2.Dot(mtv, axes[2]) < Vector2.Dot(mtv, axes[3]))
             {
                 _box.verticalVelocity -= _box.verticalVelocity + _box.verticalVelocity * 0.1f;
+                _box.gravityEffectOnBox = false;
+                tempVelocity = Math.Max(0, Math.Abs(_box.horizontalVelocity) - _box.forceFromFriction);
+                _box.horizontalVelocity = Math.Sign(_box.horizontalVelocity) * tempVelocity;
+                _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
             }
-            _box.gravityEffectOnBox = false;
-            _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
-            _box.forceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
-            tempVelocity = Math.Max(0, Math.Abs(_box.horizontalVelocity) - _box.forceFromFriction);
-            _box.horizontalVelocity = Math.Sign(_box.horizontalVelocity) * tempVelocity;
+            else
+            {
+                _box.gravityEffectOnBox = true;
+            }
         }
         else
         {

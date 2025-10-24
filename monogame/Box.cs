@@ -12,7 +12,7 @@ public class BoxObject
 
     private Texture2D _texture;
     private Rectangle _bounds;
-    private Vector2 _centreOfBox;
+    public Vector2 Position { get; set; }
     private Vector2 _mousePointBeforeRelease;
     private Vector2 _mousePointAfterRelease;
 
@@ -37,7 +37,7 @@ public class BoxObject
     {
         _texture = texture;
         _bounds = new Rectangle(0, 0, 100, 100);
-        _centreOfBox = initialPosition;
+        Position = initialPosition;
         gravity = 10;
         verticalVelocity = 0;
         horizontalVelocity = 0;
@@ -62,8 +62,8 @@ public class BoxObject
         { isMoving = false; }
         if (mouse.LeftButton == ButtonState.Pressed)
         {
-            _centreOfBox.X = mouse.X;
-            _centreOfBox.Y = mouse.Y;
+            Position.X = mouse.X;
+            Position.Y = mouse.Y;
             _mousePointBeforeRelease.X = mouse.X;
             _mousePointBeforeRelease.Y = mouse.Y;
             edgeTrigger = true;
@@ -78,30 +78,30 @@ public class BoxObject
             edgeTrigger = false;
         }
 
-        if (_centreOfBox.Y + _bounds.Height / 2 < window.ClientBounds.Height && mouse.LeftButton == ButtonState.Released)
+        if (Position.Y + _bounds.Height / 2 < window.ClientBounds.Height && mouse.LeftButton == ButtonState.Released)
         {
             if (gravityEffectOnBox)
             {
                 verticalVelocity += mass * (gravity * gravityScale);
             }
 
-            if (verticalVelocity < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)
+            if (verticalVelocity < 0 && (Position.Y - _bounds.Height / 2) < 0)
             {
                 verticalVelocity = 0;
             }
 
-            _centreOfBox.Y += (int)verticalVelocity;
+            Position.Y += (int)verticalVelocity;
         }
         else
         {
             verticalVelocity = 0;
         }
 
-        if (_centreOfBox.X + _bounds.Width / 2 < window.ClientBounds.Width &&
-            _centreOfBox.X - _bounds.Width / 2 > 0 &&
+        if (Position.X + _bounds.Width / 2 < window.ClientBounds.Width &&
+            Position.X - _bounds.Width / 2 > 0 &&
             mouse.LeftButton == ButtonState.Released)
         {
-            _centreOfBox.X += (int)horizontalVelocity;
+            Position.X += (int)horizontalVelocity;
         }
         else
         {
@@ -111,7 +111,7 @@ public class BoxObject
     }
     public void Translate(Vector2 vectorToTranslateBy)
     {
-        _centreOfBox += vectorToTranslateBy;
+        Position += vectorToTranslateBy;
     }
     public Vector2[] GetCorners()
     {
@@ -130,7 +130,7 @@ public class BoxObject
         Vector2[] worldCorners = new Vector2[4];
         for (int i = 0; i < 4; i++)
         {
-            worldCorners[i] = _centreOfBox + new Vector2(
+            worldCorners[i] = Position + new Vector2(
                 localCorners[i].X * cos - localCorners[i].Y * sin,
                 localCorners[i].X * sin + localCorners[i].Y * cos 
             );
@@ -142,8 +142,8 @@ public class BoxObject
         get
         {
             return new Rectangle(
-                (int)(_centreOfBox.X - _bounds.Width / 2), //left side
-                (int)(_centreOfBox.Y - _bounds.Height / 2),//top side
+                (int)(Position.X - _bounds.Width / 2), //left side
+                (int)(Position.Y - _bounds.Height / 2),//top side
                 _bounds.Width, //right side
                 _bounds.Height //bottom side
             );
@@ -157,7 +157,7 @@ public class BoxObject
     {
         spriteBatch.Draw(
             _texture,
-            _centreOfBox,
+            Position,
             _bounds,
             Color.Black,
             rotation,
