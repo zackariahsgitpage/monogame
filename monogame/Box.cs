@@ -89,8 +89,9 @@ public class BoxObject
             {
                 verticalVelocity = 0;
             }
-
-            Position.Y += (int)verticalVelocity;
+            float tempPositionY = Position.Y;
+            float tempPositionX = Position.X;
+            tempPositionY += (float)verticalVelocity;
         }
         else
         {
