@@ -1,0 +1,15 @@
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\obj\Debug\net9.0\graph representation.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\obj\Debug\net9.0\graph representation.AssemblyInfoInputs.cache
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\obj\Debug\net9.0\graph representation.AssemblyInfo.cs
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\obj\Debug\net9.0\graph representation.csproj.CoreCompileInputs.cache
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\obj\Debug\net9.0\graph representation.sourcelink.json
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\bin\Debug\net9.0\graph representation.exe
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\bin\Debug\net9.0\graph representation.deps.json
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\bin\Debug\net9.0\graph representation.runtimeconfig.json
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\bin\Debug\net9.0\graph representation.dll
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\bin\Debug\net9.0\graph representation.pdb
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\obj\Debug\net9.0\graph representation.dll
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\obj\Debug\net9.0\refint\graph representation.dll
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\obj\Debug\net9.0\graph representation.pdb
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\obj\Debug\net9.0\graph representation.genruntimeconfig.cache
+C:\Users\zack\.vscode\codeForSchool\monogame\monogame\graph representation\obj\Debug\net9.0\ref\graph representation.dll

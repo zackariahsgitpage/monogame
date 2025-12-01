@@ -111,40 +111,38 @@ public class Game1 : Game
         axes[2] = new Vector2(1, 0);  
         axes[3] = new Vector2(0, 1);  
         var result = SATHelper.CollisionData(_box.GetCorners(), _line.GetCorners(), axes);
-
+        
         if (result.IsColliding)
         {
+            _box.forceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
             Vector2 mtv = result.MTV;
-            if (Vector2.Dot(mtv, _box.Position - _line.Position) < 0)
+             if (Vector2.Dot(mtv, _box._centreOfBox - _line.Position) < 0)
             {
                 mtv = -mtv;
             }
-            _box.Translate(mtv);
-            _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
-            if (Vector2.Dot(mtv, axes[2]) < Vector2.Dot(mtv, axes[3]))
+              Vector2 normal = Vector2.Normalize(mtv);
+              _box.Translate(mtv);
+             // if (Vector2.Dot(mtv, axes[2]) < Vector2.Dot(mtv, axes[3])) // if it collides not on the side
+              //if the directionality between the horizontal axis and the mtv and is less than the vertical axis and the mtv
             {
-                _box.verticalVelocity -= _box.verticalVelocity + _box.verticalVelocity * 0.1f;
+                _box.verticalVelocity -= _box.verticalVelocity + _box.verticalVelocity* 0.1f;
                 _box.gravityEffectOnBox = false;
-                tempVelocity = Math.Max(0, Math.Abs(_box.horizontalVelocity) - _box.forceFromFriction);
-                _box.horizontalVelocity = Math.Sign(_box.horizontalVelocity) * tempVelocity;
+                if (Vector2.Dot(normal, axes[3]) >= 0){ _box.gravityEffectOnBox = false;}// if the collision occurs above the line
+                else {_box.gravityEffectOnBox = true;}
                 _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
-            }
-            else
-            {
-                _box.gravityEffectOnBox = true;
+                 tempVelocity = Math.Max(0, Math.Abs(_box.horizontalVelocity) - _box.forceFromFriction);
+                _box.horizontalVelocity = Math.Sign(_box.horizontalVelocity) * tempVelocity;
             }
         }
         else
-        {
-            _box.gravityEffectOnBox = true;
-        }
-        {
+            {_box.gravityEffectOnBox = true;}
+        
 
 
             // TODO: Add your update logic here
 
             base.Update(gameTime);
-        }
+        
     }
 
     protected override void Draw(GameTime gameTime)

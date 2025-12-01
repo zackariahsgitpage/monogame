@@ -12,7 +12,7 @@ public class BoxObject
 
     private Texture2D _texture;
     private Rectangle _bounds;
-    public Vector2 Position { get; set; }
+    public Vector2 _centreOfBox;
     private Vector2 _mousePointBeforeRelease;
     private Vector2 _mousePointAfterRelease;
 
@@ -37,7 +37,7 @@ public class BoxObject
     {
         _texture = texture;
         _bounds = new Rectangle(0, 0, 100, 100);
-        Position = initialPosition;
+        _centreOfBox = initialPosition;
         gravity = 10;
         verticalVelocity = 0;
         horizontalVelocity = 0;
@@ -56,14 +56,14 @@ public class BoxObject
     {
         MouseState mouse = Mouse.GetState();
         resolvedSpeed = (float)Math.Sqrt(verticalVelocity * verticalVelocity + horizontalVelocity * horizontalVelocity);
+        _centreOfBox = new Vector2(_centreOfBox.X, _centreOfBox.Y);
         if (verticalVelocity > 0 || horizontalVelocity > 0)
         { isMoving = true; }
         else
         { isMoving = false; }
         if (mouse.LeftButton == ButtonState.Pressed)
         {
-            Position.X = mouse.X;
-            Position.Y = mouse.Y;
+            _centreOfBox = mouse.Position.ToVector2();
             _mousePointBeforeRelease.X = mouse.X;
             _mousePointBeforeRelease.Y = mouse.Y;
             edgeTrigger = true;
@@ -78,31 +78,30 @@ public class BoxObject
             edgeTrigger = false;
         }
 
-        if (Position.Y + _bounds.Height / 2 < window.ClientBounds.Height && mouse.LeftButton == ButtonState.Released)
+        if (_centreOfBox.Y + _bounds.Height / 2 < window.ClientBounds.Height && mouse.LeftButton == ButtonState.Released)
         {
             if (gravityEffectOnBox)
             {
                 verticalVelocity += mass * (gravity * gravityScale);
             }
 
-            if (verticalVelocity < 0 && (Position.Y - _bounds.Height / 2) < 0)
+            if (verticalVelocity < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)
             {
                 verticalVelocity = 0;
             }
-            float tempPositionY = Position.Y;
-            float tempPositionX = Position.X;
-            tempPositionY += (float)verticalVelocity;
+           
+            _centreOfBox.Y += (float)verticalVelocity;
         }
         else
         {
             verticalVelocity = 0;
         }
 
-        if (Position.X + _bounds.Width / 2 < window.ClientBounds.Width &&
-            Position.X - _bounds.Width / 2 > 0 &&
+        if (_centreOfBox.X + _bounds.Width / 2 < window.ClientBounds.Width &&
+            _centreOfBox.X - _bounds.Width / 2 > 0 &&
             mouse.LeftButton == ButtonState.Released)
         {
-            Position.X += (int)horizontalVelocity;
+            _centreOfBox.X += (int)horizontalVelocity;
         }
         else
         {
@@ -112,7 +111,7 @@ public class BoxObject
     }
     public void Translate(Vector2 vectorToTranslateBy)
     {
-        Position += vectorToTranslateBy;
+        _centreOfBox += vectorToTranslateBy;
     }
     public Vector2[] GetCorners()
     {
@@ -131,7 +130,7 @@ public class BoxObject
         Vector2[] worldCorners = new Vector2[4];
         for (int i = 0; i < 4; i++)
         {
-            worldCorners[i] = Position + new Vector2(
+            worldCorners[i] = _centreOfBox + new Vector2(
                 localCorners[i].X * cos - localCorners[i].Y * sin,
                 localCorners[i].X * sin + localCorners[i].Y * cos 
             );
@@ -143,8 +142,8 @@ public class BoxObject
         get
         {
             return new Rectangle(
-                (int)(Position.X - _bounds.Width / 2), //left side
-                (int)(Position.Y - _bounds.Height / 2),//top side
+                (int)(_centreOfBox.X - _bounds.Width / 2), //left side
+                (int)(_centreOfBox.Y - _bounds.Height / 2),//top side
                 _bounds.Width, //right side
                 _bounds.Height //bottom side
             );
@@ -158,7 +157,7 @@ public class BoxObject
     {
         spriteBatch.Draw(
             _texture,
-            Position,
+            _centreOfBox,
             _bounds,
             Color.Black,
             rotation,

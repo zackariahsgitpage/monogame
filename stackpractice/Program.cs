@@ -1,24 +1,88 @@
 ﻿
 using System.ComponentModel;
 using System.Configuration.Assemblies;
-DynamicQueue<int> dynafo = new DynamicQueue<int>();
-dynafo.Add(10);
+PriorityQueue<int> dynafo = new PriorityQueue<int>();
+dynafo.Add(10, 2);
+dynafo.Add(20, 5);
+dynafo.Add(30, 1);
+dynafo.Add(40, 7);
+dynafo.Add(50, 1);
+Console.WriteLine(dynafo.Remove());
+Console.WriteLine(dynafo.Remove());
+Console.WriteLine(dynafo.Remove());
 Console.WriteLine(dynafo.Remove());
 
+class PriorityQueue<T> : DynamicQueue<T>
+{
+    Node<T> _front;
+    Node<T> _rear;
+    int _size;
+    public PriorityQueue() : base()
+    { }
+    public override void Add(T data, int priority = 0)
+    {
+
+        Node<T> newNode = new Node<T>(data, priority);
+        if (_size == 0) //insert if empty
+        {
+            _rear = newNode;
+            _front = newNode;
+        }
+        else
+        {
+            Node<T> _tempPointer = _front;
+            while (_tempPointer._pointer != newNode)
+            {
+                if (_tempPointer._pointer != null && _tempPointer._pointer._priority > priority) //insert in middle
+                {
+                    newNode._pointer = _tempPointer._pointer;
+                    _tempPointer._pointer = newNode;
+                }
+                else if (priority < _front._priority) //insert at beginning
+                {
+                    newNode._pointer = _front;
+                    _front = newNode;
+                }
+                else if (_tempPointer == _rear) //insert at end
+                {
+                    _tempPointer._pointer = newNode;
+                    _rear = newNode;
+                }
+                else //check next node
+                {
+                    _tempPointer = _tempPointer._pointer;
+                }
+            }
+        }
+        _size++;
+    }
+    public override T Remove()
+    {
+        if (_size == 0)
+            throw new Exception("Queue is empty");
+        _size--;
+        T temp = _front._data;
+        _front = _front._pointer;
+        return temp;
+    }
+     
+}
 
 class DynamicQueue<T>
 {
     Node<T> _front;
     Node<T> _rear;
     int _size;
-    private class Node<T>
+    protected class Node<T>
     {
         public T _data;
         public Node<T> _pointer;
-        public Node(T data)
+        public int _priority;
+        public Node(T data, int priority = 0)
         {
             _data = data;
             _pointer = null;
+            _priority = priority;
         }
     }
     public DynamicQueue()
@@ -38,14 +102,16 @@ class DynamicQueue<T>
     {
         return _size;
     }
-    public void Add(T data)
+    public virtual void Add(T data, int priority = 0)
     {
         Node<T> newNode = new Node<T>(data);
         if (_size == 0)
             _front = newNode;
         else
-            _rear._pointer = newNode;
-        _rear = newNode; 
+        {     
+        _rear._pointer = newNode;
+        }
+        _rear = newNode;
         _size++;
     }
     public T Peek()
@@ -54,7 +120,7 @@ class DynamicQueue<T>
             throw new Exception("Queue is empty");
         return _front._data;
     }
-    public T Remove()
+    public virtual T Remove()
     {
         if (_size == 0)
             throw new Exception("Queue is empty");
