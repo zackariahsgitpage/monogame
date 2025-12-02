@@ -82,7 +82,7 @@ public class Game1 : Game
     {
         // TODO: Add your initialization logic here
         positionOfLine=new Vector2(200, 400);
-        lineRotation = -MathHelper.ToRadians(0);
+        lineRotation = -MathHelper.ToRadians(45);
         axes = new Vector2[]
         {
             new Vector2((float)Math.Cos(lineRotation), (float)Math.Sin(lineRotation)),

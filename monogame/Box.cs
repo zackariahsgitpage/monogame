@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Diagnostics.Metrics;
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
@@ -31,7 +32,7 @@ public class BoxObject
     public float mass;
     public float boxScale { get; set; } = 1f;
     public bool gravityEffectOnBox;
-    public float gravityScale { get; set; } = 0.03f;
+    public float gravityScale { get; set; } = 0.4f;
 
     public BoxObject(Texture2D texture, Vector2 initialPosition)
     {
@@ -54,6 +55,7 @@ public class BoxObject
 
     public void Update(GameWindow window)
     {
+        //KeyState keyboardInput = KeyState.Down;
         MouseState mouse = Mouse.GetState();
         resolvedSpeed = (float)Math.Sqrt(verticalVelocity * verticalVelocity + horizontalVelocity * horizontalVelocity);
         _centreOfBox = new Vector2(_centreOfBox.X, _centreOfBox.Y);
@@ -68,6 +70,7 @@ public class BoxObject
             _mousePointBeforeRelease.Y = mouse.Y;
             edgeTrigger = true;
         }
+        //switch (keyboardInput.
 
         if (mouse.LeftButton == ButtonState.Released && edgeTrigger)
         {

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Transactions;
 using System.Xml;
 Graph<char> graph = new Graph<char>();
 graph.Add('A');
@@ -62,16 +64,17 @@ public void BFS(T start, ref List<T> visited)
     {
         List<T> Queue = new List<T>();
         Queue.Add(start);
-        for (int i = 0; i < _nodes.Count(); i++)
+        while (Queue.Count !=0)
         {
-            foreach (var edge in _nodes[Queue[i]]._edges)
+            foreach (var edge in _nodes[Queue[0]]._edges)
             {
                 if (!Queue.Contains(edge._data) && !visited.Contains(edge._data))
                 {
                     Queue.Add(edge._data);
                 }
             }
-            visited.Add(Queue[i]);
+            visited.Add(Queue[0]);
+            Queue.RemoveAt(0);
         }
     }
     public void Add(T nodeName)
