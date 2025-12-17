@@ -16,7 +16,8 @@ public class BoxObject
     public Vector2 _centreOfBox;
     private Vector2 _mousePointBeforeRelease;
     private Vector2 _mousePointAfterRelease;
-
+    public float angularVelocity;
+    public float momentOfInertia;
     public float gravity;
     public float horizontalAcceleration;
   public float verticalVelocity;
@@ -32,7 +33,7 @@ public class BoxObject
     public float mass;
     public float boxScale { get; set; } = 1f;
     public bool gravityEffectOnBox;
-    public float gravityScale { get; set; } = 0.4f;
+    public float gravityScale { get; set; } = 0.1f;
 
     public BoxObject(Texture2D texture, Vector2 initialPosition)
     {
@@ -51,11 +52,13 @@ public class BoxObject
         forceFromFriction = 0;
         mass = 1;
         gravityEffectOnBox = true;
+        angularVelocity = 0f;
+        momentOfInertia = (mass*(_bounds.Width*_bounds.Width + _bounds.Height*_bounds.Height)/12);
     }
 
     public void Update(GameWindow window)
     {
-        //KeyState keyboardInput = KeyState.Down;
+        KeyboardState keyboard = Keyboard.GetState();
         MouseState mouse = Mouse.GetState();
         resolvedSpeed = (float)Math.Sqrt(verticalVelocity * verticalVelocity + horizontalVelocity * horizontalVelocity);
         _centreOfBox = new Vector2(_centreOfBox.X, _centreOfBox.Y);
@@ -70,7 +73,7 @@ public class BoxObject
             _mousePointBeforeRelease.Y = mouse.Y;
             edgeTrigger = true;
         }
-        //switch (keyboardInput.
+        
 
         if (mouse.LeftButton == ButtonState.Released && edgeTrigger)
         {
@@ -111,6 +114,7 @@ public class BoxObject
             horizontalVelocity = 0;
         }
 
+    rotation-= angularVelocity;
     }
     public void Translate(Vector2 vectorToTranslateBy)
     {

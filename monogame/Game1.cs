@@ -106,6 +106,7 @@ public class Game1 : Game
     protected override void Update(GameTime gameTime)
     {
         _box.Update(Window);
+        _line.Update(Window);
         axes[0] = new Vector2((float)Math.Cos(lineRotation), (float)Math.Sin(lineRotation));   
         axes[1] = new Vector2(-(float)Math.Sin(lineRotation), (float)Math.Cos(lineRotation));  
         axes[2] = new Vector2(1, 0);  
@@ -122,6 +123,7 @@ public class Game1 : Game
             }
               Vector2 normal = Vector2.Normalize(mtv);
               _box.Translate(mtv);
+              Vector2 collisionForce = normal * _box.normalReactionForce;
              // if (Vector2.Dot(mtv, axes[2]) < Vector2.Dot(mtv, axes[3])) // if it collides not on the side
               //if the directionality between the horizontal axis and the mtv and is less than the vertical axis and the mtv
             {
@@ -133,6 +135,25 @@ public class Game1 : Game
                  tempVelocity = Math.Max(0, Math.Abs(_box.horizontalVelocity) - _box.forceFromFriction);
                 _box.horizontalVelocity = Math.Sign(_box.horizontalVelocity) * tempVelocity;
             }
+             Vector2[] corners = _box.GetCorners();
+             Vector2 contactPoint = corners[0];
+float maxProjection = Vector2.Dot(corners[0], normal);
+
+foreach (var corner in corners)
+{
+    float point = Vector2.Dot(corner, normal);
+    if (point > maxProjection)
+    {
+        maxProjection = point;
+        contactPoint = corner;
+    }
+}
+            Vector2 leverArm = contactPoint - _box._centreOfBox;
+            float torque = leverArm.X * collisionForce.Y - leverArm.Y * collisionForce.X;
+            float angularAcceleration = torque / _box.momentOfInertia;
+            _box.angularVelocity += angularAcceleration * 0.016f; // scale for 60fps
+            _box.angularVelocity *= 0.98f;
+            
         }
         else
             {_box.gravityEffectOnBox = true;}

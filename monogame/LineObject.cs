@@ -1,12 +1,17 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using System.Collections;
+using System.Diagnostics.Metrics;
+using System.Runtime.CompilerServices;
+using monogame;
 
 namespace monogame;
 public class LineObject
 {
     public Texture2D Texture { get; private set; }
-    public Vector2 Position { get; set; }
+    public Vector2 Position;
     public Rectangle SourceRect { get; private set; }
     public float Rotation { get; set; }
     public Vector2 Origin { get; set; } = Vector2.Zero;
@@ -20,7 +25,27 @@ public class LineObject
         SourceRect = sourceRect;
         Rotation = rotation;
     }
-  
+  public void Update(GameWindow window)
+    {
+         KeyboardState keyboard = Keyboard.GetState();
+         if (keyboard.IsKeyDown(Keys.Right))
+        {
+         Position.X+=10;
+        }
+        if (keyboard.IsKeyDown(Keys.Left))
+        {
+         Position.X-=10;
+        }
+        if (keyboard.IsKeyDown(Keys.Up))
+        {
+         Position.Y-=10;
+        }
+        if (keyboard.IsKeyDown(Keys.Down))
+        {
+         Position.Y+=10;
+        }
+    }
+
 
     public Rectangle BoundingBox
     {
