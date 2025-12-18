@@ -82,14 +82,7 @@ public class Game1 : Game
     {
         // TODO: Add your initialization logic here
         positionOfLine=new Vector2(200, 400);
-        lineRotation = -MathHelper.ToRadians(45);
-        axes = new Vector2[]
-        {
-            new Vector2((float)Math.Cos(lineRotation), (float)Math.Sin(lineRotation)),
-            new Vector2(-(float)Math.Sin(lineRotation), (float)Math.Cos(lineRotation)),
-            new Vector2(1,0),
-            new Vector2(0,1)
-        };
+      
         base.Initialize();  
     }
 
@@ -98,13 +91,21 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _BlackTexture = Content.Load<Texture2D>("blacksquare");
         _box = new BoxObject(_BlackTexture, new Vector2(0, 0));
-        _line = new LineObject(_BlackTexture, new Vector2(200, 400), new Rectangle(0, 0, 400, 10), lineRotation);
+        _line = new LineObject(_BlackTexture, new Vector2(200, 400), new Rectangle(0, 0, 400, 10), 30);
         _line.Origin = new Vector2(_line.SourceRect.Width / 2f, _line.SourceRect.Height / 2f);
         // TODO: use this.Content to load your game content here
     }
 
     protected override void Update(GameTime gameTime)
     {
+          lineRotation = _line.Rotation;
+        axes = new Vector2[]
+        {
+            new Vector2((float)Math.Cos(lineRotation), (float)Math.Sin(lineRotation)),
+            new Vector2(-(float)Math.Sin(lineRotation), (float)Math.Cos(lineRotation)),
+            new Vector2(1,0),
+            new Vector2(0,1)
+        };
         _box.Update(Window);
         _line.Update(Window);
         axes[0] = new Vector2((float)Math.Cos(lineRotation), (float)Math.Sin(lineRotation));   
@@ -115,7 +116,7 @@ public class Game1 : Game
         
         if (result.IsColliding)
         {
-            _box.forceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
+
             Vector2 mtv = result.MTV;
              if (Vector2.Dot(mtv, _box._centreOfBox - _line.Position) < 0)
             {
@@ -123,37 +124,33 @@ public class Game1 : Game
             }
               Vector2 normal = Vector2.Normalize(mtv);
               _box.Translate(mtv);
-              Vector2 collisionForce = normal * _box.normalReactionForce;
-             // if (Vector2.Dot(mtv, axes[2]) < Vector2.Dot(mtv, axes[3])) // if it collides not on the side
-              //if the directionality between the horizontal axis and the mtv and is less than the vertical axis and the mtv
-            {
-                _box.verticalVelocity -= _box.verticalVelocity + _box.verticalVelocity* 0.1f;
-                _box.gravityEffectOnBox = false;
-                if (Vector2.Dot(normal, axes[3]) >= 0){ _box.gravityEffectOnBox = false;}// if the collision occurs above the line
-                else {_box.gravityEffectOnBox = true;}
+                _box.directionalVelocity.Y-= _box.directionalVelocity.Y + _box.directionalVelocity.Y* 0.1f;
+                if (Vector2.Dot(normal, axes[3]) <= 0){ _box.gravityEffectOnBox = true;}
+                else {_box.gravityEffectOnBox = false;}// if the collision occurs above the line
                 _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
-                 tempVelocity = Math.Max(0, Math.Abs(_box.horizontalVelocity) - _box.forceFromFriction);
-                _box.horizontalVelocity = Math.Sign(_box.horizontalVelocity) * tempVelocity;
-            }
+                 _box.forceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
+ 
+                 tempVelocity = Math.Max(0, Math.Abs(_box.directionalVelocity.X) - _box.forceFromFriction);
+                _box.directionalVelocity.X = Math.Sign(_box.directionalVelocity.X) * tempVelocity;
+           
              Vector2[] corners = _box.GetCorners();
              Vector2 contactPoint = corners[0];
-float maxProjection = Vector2.Dot(corners[0], normal);
 
-foreach (var corner in corners)
-{
-    float point = Vector2.Dot(corner, normal);
-    if (point > maxProjection)
+    float maxProjection = Vector2.Dot(corners[0], normal);
+    foreach (var corner in corners)
     {
+      float point = Vector2.Dot(corner, normal);
+      if (point > maxProjection)
+      {
         maxProjection = point;
         contactPoint = corner;
-    }
-}
+      }
+    }     
+           Vector2 collisionForce = normal * _box.normalReactionForce;
             Vector2 leverArm = contactPoint - _box._centreOfBox;
             float torque = leverArm.X * collisionForce.Y - leverArm.Y * collisionForce.X;
             float angularAcceleration = torque / _box.momentOfInertia;
-            _box.angularVelocity += angularAcceleration * 0.016f; // scale for 60fps
-            _box.angularVelocity *= 0.98f;
-            
+            _box.angularVelocity += angularAcceleration * 0.016f; // scale for 60fps  
         }
         else
             {_box.gravityEffectOnBox = true;}

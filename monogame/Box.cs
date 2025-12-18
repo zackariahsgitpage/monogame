@@ -22,10 +22,11 @@ public class BoxObject
     public float horizontalAcceleration;
   public float verticalVelocity;
     public float horizontalVelocity;
+    public Vector2 directionalVelocity;
     public float forceFromFriction;
     public float coefficientOfFriction;
 
-    private float rotation;
+    public float rotation;
     private bool edgeTrigger;
     private bool isMoving;
     private float resolvedSpeed;
@@ -47,12 +48,13 @@ public class BoxObject
         rotation = 0f;
         isMoving = false;
         resolvedSpeed = 0;
-        normalReactionForce = 0;
+        normalReactionForce = 0f;
         coefficientOfFriction = 0.05f;
         forceFromFriction = 0;
         mass = 1;
         gravityEffectOnBox = true;
         angularVelocity = 0f;
+        directionalVelocity = new Vector2(0,0);
         momentOfInertia = (mass*(_bounds.Width*_bounds.Width + _bounds.Height*_bounds.Height)/12);
     }
 
@@ -60,9 +62,9 @@ public class BoxObject
     {
         KeyboardState keyboard = Keyboard.GetState();
         MouseState mouse = Mouse.GetState();
-        resolvedSpeed = (float)Math.Sqrt(verticalVelocity * verticalVelocity + horizontalVelocity * horizontalVelocity);
+        resolvedSpeed = directionalVelocity.Length();
         _centreOfBox = new Vector2(_centreOfBox.X, _centreOfBox.Y);
-        if (verticalVelocity > 0 || horizontalVelocity > 0)
+        if (verticalVelocity > 0 || horizontalVelocity > 0 || directionalVelocity.Length() > 0)
         { isMoving = true; }
         else
         { isMoving = false; }
@@ -72,15 +74,13 @@ public class BoxObject
             _mousePointBeforeRelease.X = mouse.X;
             _mousePointBeforeRelease.Y = mouse.Y;
             edgeTrigger = true;
+            rotation = 0f;
         }
-        
-
         if (mouse.LeftButton == ButtonState.Released && edgeTrigger)
         {
             _mousePointAfterRelease.X = mouse.X;
             _mousePointAfterRelease.Y = mouse.Y;
-            verticalVelocity += (float)(_mousePointAfterRelease.Y - _mousePointBeforeRelease.Y) / 5;
-            horizontalVelocity += (float)(_mousePointAfterRelease.X - _mousePointBeforeRelease.X) / 5;
+            directionalVelocity+= new Vector2((_mousePointAfterRelease.X - _mousePointBeforeRelease.X)/5,(_mousePointAfterRelease.Y - _mousePointBeforeRelease.Y)/5);
             edgeTrigger = false;
         }
 
@@ -88,33 +88,34 @@ public class BoxObject
         {
             if (gravityEffectOnBox)
             {
-                verticalVelocity += mass * (gravity * gravityScale);
+                directionalVelocity.Y += mass * (gravity * gravityScale);
             }
 
-            if (verticalVelocity < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)
+            if (directionalVelocity.Y < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)
             {
-                verticalVelocity = 0;
+                directionalVelocity.Y = 0;
             }
            
-            _centreOfBox.Y += (float)verticalVelocity;
+            _centreOfBox.Y += directionalVelocity.Y;
         }
         else
         {
-            verticalVelocity = 0;
+            directionalVelocity.Y = 0;
         }
 
         if (_centreOfBox.X + _bounds.Width / 2 < window.ClientBounds.Width &&
             _centreOfBox.X - _bounds.Width / 2 > 0 &&
             mouse.LeftButton == ButtonState.Released)
         {
-            _centreOfBox.X += (int)horizontalVelocity;
+            _centreOfBox.X += directionalVelocity.X;
         }
         else
         {
-            horizontalVelocity = 0;
+            directionalVelocity.X = 0;
         }
-
+    angularVelocity *= 0.98f;
     rotation-= angularVelocity;
+    
     }
     public void Translate(Vector2 vectorToTranslateBy)
     {

@@ -13,21 +13,34 @@ public class LineObject
     public Texture2D Texture { get; private set; }
     public Vector2 Position;
     public Rectangle SourceRect { get; private set; }
-    public float Rotation { get; set; }
+    public float Rotation {get; set;} = 0f;
     public Vector2 Origin { get; set; } = Vector2.Zero;
     public float Scale { get; set; } = 1f;
     public Color Color { get; set; } = Color.Black;
 
-    public LineObject(Texture2D texture, Vector2 position, Rectangle sourceRect, float rotation = 0f)
+    public LineObject(Texture2D texture, Vector2 position, Rectangle sourceRect, float rotation)
     {
         Texture = texture;
         Position = position;
         SourceRect = sourceRect;
-        Rotation = rotation;
+        Rotation = -MathHelper.ToRadians(rotation);
+
     }
   public void Update(GameWindow window)
     {
          KeyboardState keyboard = Keyboard.GetState();
+         if (keyboard.IsKeyDown(Keys.O))
+        {
+            Rotation +=MathHelper.ToRadians(1f);
+        }
+         if (keyboard.IsKeyDown(Keys.I))
+        {
+            Rotation -=MathHelper.ToRadians(1f);
+        }
+          if (keyboard.IsKeyDown(Keys.P))
+        {
+            Rotation +=100;
+        }
          if (keyboard.IsKeyDown(Keys.Right))
         {
          Position.X+=10;
