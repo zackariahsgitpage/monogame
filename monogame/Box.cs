@@ -82,11 +82,12 @@ public class BoxObject
             _mousePointAfterRelease.Y = mouse.Y;
             directionalVelocity+= new Vector2((_mousePointAfterRelease.X - _mousePointBeforeRelease.X)/5,(_mousePointAfterRelease.Y - _mousePointBeforeRelease.Y)/5);
             edgeTrigger = false;
+            angularVelocity=0;
         }
 
         if (_centreOfBox.Y + _bounds.Height / 2 < window.ClientBounds.Height && mouse.LeftButton == ButtonState.Released)
         {
-            if (gravityEffectOnBox)
+            //if (gravityEffectOnBox)
             {
                 directionalVelocity.Y += mass * (gravity * gravityScale);
             }

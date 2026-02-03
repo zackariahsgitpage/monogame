@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Metrics;
+using System.Security.Cryptography;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -14,11 +15,12 @@ public class Game1 : Game
     private BoxObject _box;
     Texture2D _BlackTexture;
     LineObject _line;
-    float tempVelocity;
+Vector2 tempVelocity;
     float lineRotation;
     Vector2 positionOfLine;
     Vector2[] axes;
-    
+     bool justCollided = true;
+    SpriteFont font;
 
   public static class SATHelper
     {
@@ -82,12 +84,13 @@ public class Game1 : Game
     {
         // TODO: Add your initialization logic here
         positionOfLine=new Vector2(200, 400);
-      
         base.Initialize();  
+
     }
 
     protected override void LoadContent()
     {
+        font = Content.Load<SpriteFont>("File");
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _BlackTexture = Content.Load<Texture2D>("blacksquare");
         _box = new BoxObject(_BlackTexture, new Vector2(0, 0));
@@ -101,6 +104,7 @@ public class Game1 : Game
           lineRotation = _line.Rotation;
         axes = new Vector2[]
         {
+        
             new Vector2((float)Math.Cos(lineRotation), (float)Math.Sin(lineRotation)),
             new Vector2(-(float)Math.Sin(lineRotation), (float)Math.Cos(lineRotation)),
             new Vector2(1,0),
@@ -113,7 +117,10 @@ public class Game1 : Game
         axes[2] = new Vector2(1, 0);  
         axes[3] = new Vector2(0, 1);  
         var result = SATHelper.CollisionData(_box.GetCorners(), _line.GetCorners(), axes);
-        
+        if (_box.directionalVelocity.Length()<0.5)
+        {
+            justCollided = false;
+        }
         if (result.IsColliding)
         {
 
@@ -123,15 +130,28 @@ public class Game1 : Game
                 mtv = -mtv;
             }
               Vector2 normal = Vector2.Normalize(mtv);
+              Vector2 tangent = new Vector2(-normal.Y,normal.X);
+              
               _box.Translate(mtv);
                 _box.directionalVelocity.Y-= _box.directionalVelocity.Y + _box.directionalVelocity.Y* 0.1f;
                 if (Vector2.Dot(normal, axes[3]) <= 0){ _box.gravityEffectOnBox = true;}
                 else {_box.gravityEffectOnBox = false;}// if the collision occurs above the line
                 _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
-                 _box.forceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
- 
-                 tempVelocity = Math.Max(0, Math.Abs(_box.directionalVelocity.X) - _box.forceFromFriction);
-                _box.directionalVelocity.X = Math.Sign(_box.directionalVelocity.X) * tempVelocity;
+                 _box.forceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction * 0.016f;
+                 float velocityAlongTangent = Vector2.Dot(_box.directionalVelocity, tangent);
+                 float newTangentVelocity;
+                if (Math.Abs(velocityAlongTangent) <= _box.forceFromFriction)
+                {
+                newTangentVelocity = 0; // static friction (stop completely)
+                }
+                else
+                {
+                    newTangentVelocity = velocityAlongTangent - Math.Sign(velocityAlongTangent) * frictionImpulse;
+                }
+                 tempVelocity.Normalize();
+                 _box.directionalVelocity -= tempVelocity*_box.forceFromFriction*0.2f;
+                // tempVelocity = Math.Max(0, Math.Abs(_box.directionalVelocity.X) - _box.forceFromFriction);
+                //_box.directionalVelocity.X = Math.Sign(_box.directionalVelocity.X) * tempVelocity;
            
              Vector2[] corners = _box.GetCorners();
              Vector2 contactPoint = corners[0];
@@ -146,10 +166,18 @@ public class Game1 : Game
         contactPoint = corner;
       }
     }     
+
            Vector2 collisionForce = normal * _box.normalReactionForce;
+
             Vector2 leverArm = contactPoint - _box._centreOfBox;
             float torque = leverArm.X * collisionForce.Y - leverArm.Y * collisionForce.X;
-            float angularAcceleration = torque / _box.momentOfInertia;
+            float angularAcceleration = torque*2 / _box.momentOfInertia;
+            if (justCollided == false)
+            {
+                _box.angularVelocity += 0.016f *angularAcceleration*4 * (lineRotation % (float)Math.PI*2);
+                _box.directionalVelocity+=normal*_box.directionalVelocity.Length()*0.5f;
+                justCollided = true;
+            }
             _box.angularVelocity += angularAcceleration * 0.016f; // scale for 60fps  
         }
         else
@@ -168,7 +196,7 @@ public class Game1 : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
         _spriteBatch.Begin();
         _line.Draw(_spriteBatch);
-       
+       _spriteBatch.DrawString(font, $"Speed: {_box.directionalVelocity.Length():F2}", new Vector2(0,0),Color.Black);
        _box.Draw(_spriteBatch);
         _spriteBatch.End();
         // TODO: Add your drawing code here

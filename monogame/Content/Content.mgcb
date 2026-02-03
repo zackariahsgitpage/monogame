@@ -25,3 +25,10 @@
 /processorParam:TextureFormat=Color
 /build:blacksquare.jpg
 
+#begin File.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:File.spritefont
+

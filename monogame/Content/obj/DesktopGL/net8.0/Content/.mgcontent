@@ -5,8 +5,10 @@
   <Config />
   <SourceFiles>
     <File>C:/Users/zack/.vscode/codeForSchool/monogame/monogame/monogame/Content/blacksquare.jpg</File>
+    <File>C:/Users/zack/.vscode/codeForSchool/monogame/monogame/monogame/Content/File.spritefont</File>
   </SourceFiles>
   <DestFiles>
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
   </DestFiles>
 </SourceFileCollection>
