@@ -23,7 +23,7 @@ public class BoxObject
   public float verticalVelocity;
     public float horizontalVelocity;
     public Vector2 directionalVelocity;
-    public float forceFromFriction;
+    public float maxForceFromFriction;
     public float coefficientOfFriction;
 
     public float rotation;
@@ -50,7 +50,7 @@ public class BoxObject
         resolvedSpeed = 0;
         normalReactionForce = 0f;
         coefficientOfFriction = 0.05f;
-        forceFromFriction = 0;
+        maxForceFromFriction = 0;
         mass = 1;
         gravityEffectOnBox = true;
         angularVelocity = 0f;

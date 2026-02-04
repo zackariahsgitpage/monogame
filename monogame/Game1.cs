@@ -15,12 +15,13 @@ public class Game1 : Game
     private BoxObject _box;
     Texture2D _BlackTexture;
     LineObject _line;
-Vector2 tempVelocity;
+    Vector2 tempVelocity;
     float lineRotation;
     Vector2 positionOfLine;
     Vector2[] axes;
      bool justCollided = true;
     SpriteFont font;
+    
 
   public static class SATHelper
     {
@@ -137,22 +138,13 @@ Vector2 tempVelocity;
                 if (Vector2.Dot(normal, axes[3]) <= 0){ _box.gravityEffectOnBox = true;}
                 else {_box.gravityEffectOnBox = false;}// if the collision occurs above the line
                 _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
-                 _box.forceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction * 0.016f;
-                 float velocityAlongTangent = Vector2.Dot(_box.directionalVelocity, tangent);
-                 float newTangentVelocity;
-                if (Math.Abs(velocityAlongTangent) <= _box.forceFromFriction)
-                {
-                newTangentVelocity = 0; // static friction (stop completely)
-                }
-                else
-                {
-                    newTangentVelocity = velocityAlongTangent - Math.Sign(velocityAlongTangent) * frictionImpulse;
-                }
-                 tempVelocity.Normalize();
-                 _box.directionalVelocity -= tempVelocity*_box.forceFromFriction*0.2f;
-                // tempVelocity = Math.Max(0, Math.Abs(_box.directionalVelocity.X) - _box.forceFromFriction);
-                //_box.directionalVelocity.X = Math.Sign(_box.directionalVelocity.X) * tempVelocity;
-           
+                 _box.maxForceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
+                 float velAlongTangent = Vector2.Dot(_box.directionalVelocity, tangent);
+                if (Math.Abs(velAlongTangent) > 0.001f)
+            {
+                float frictionMagnitude = Math.Min(Math.Abs(velAlongTangent),_box.maxForceFromFriction);
+                _box.directionalVelocity -= tangent*Math.Sign(velAlongTangent)*frictionMagnitude *0.2f;
+            }         
              Vector2[] corners = _box.GetCorners();
              Vector2 contactPoint = corners[0];
 
