@@ -132,6 +132,9 @@ public class Game1 : Game
             }
               Vector2 normal = Vector2.Normalize(mtv);
               Vector2 tangent = new Vector2(-normal.Y,normal.X);
+              float velAlongNormal = Vector2.Dot(_box.directionalVelocity, normal);
+
+            bool restingOnSurface = Math.Abs(velAlongNormal) < 0.05f &&  Math.Abs(_box.angularVelocity) < 0.1f;
               
               _box.Translate(mtv);
                 _box.directionalVelocity.Y-= _box.directionalVelocity.Y + _box.directionalVelocity.Y* 0.1f;
@@ -140,11 +143,17 @@ public class Game1 : Game
                 _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
                  _box.maxForceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
                  float velAlongTangent = Vector2.Dot(_box.directionalVelocity, tangent);
-                if (Math.Abs(velAlongTangent) > 0.001f)
+             //   if (Math.Abs(velAlongTangent) > 0.001f)
+           // {
+           //     float frictionMagnitude = Math.Min(Math.Abs(velAlongTangent),_box.maxForceFromFriction);
+           //     _box.directionalVelocity -= tangent*Math.Sign(velAlongTangent)*frictionMagnitude *0.2f;
+           // }         
+           Vector2 contactPoint;
+           if (restingOnSurface)
             {
-                float frictionMagnitude = Math.Min(Math.Abs(velAlongTangent),_box.maxForceFromFriction);
-                _box.directionalVelocity -= tangent*Math.Sign(velAlongTangent)*frictionMagnitude *0.2f;
-            }         
+                contactPoint = _box._centreOfBox;
+            }
+            else{
              Vector2[] corners = _box.GetCorners();
              Vector2 contactPoint = corners[0];
 
@@ -157,20 +166,25 @@ public class Game1 : Game
         maxProjection = point;
         contactPoint = corner;
       }
-    }     
-
+    }   
+            }
            Vector2 collisionForce = normal * _box.normalReactionForce;
-
             Vector2 leverArm = contactPoint - _box._centreOfBox;
             float torque = leverArm.X * collisionForce.Y - leverArm.Y * collisionForce.X;
+            if (restingOnSurface)
+            {
+                _box.angularVelocity = 0f;
+                torque = 0f;
+            }
             float angularAcceleration = torque*2 / _box.momentOfInertia;
             if (justCollided == false)
             {
-                _box.angularVelocity += 0.016f *angularAcceleration*4 * (lineRotation % (float)Math.PI*2);
+                _box.angularVelocity += 0.016f *angularAcceleration*4;
                 _box.directionalVelocity+=normal*_box.directionalVelocity.Length()*0.5f;
                 justCollided = true;
             }
             _box.angularVelocity += angularAcceleration * 0.016f; // scale for 60fps  
+            
         }
         else
             {_box.gravityEffectOnBox = true;}
