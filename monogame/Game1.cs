@@ -21,6 +21,7 @@ public class Game1 : Game
     Vector2[] axes;
      bool justCollided = true;
     SpriteFont font;
+    float frictionScale = 0.1f;
     
 
   public static class SATHelper
@@ -137,17 +138,20 @@ public class Game1 : Game
             bool restingOnSurface = Math.Abs(velAlongNormal) < 0.05f &&  Math.Abs(_box.angularVelocity) < 0.1f;
               
               _box.Translate(mtv);
-                _box.directionalVelocity.Y-= _box.directionalVelocity.Y + _box.directionalVelocity.Y* 0.1f;
-                if (Vector2.Dot(normal, axes[3]) <= 0){ _box.gravityEffectOnBox = true;}
-                else {_box.gravityEffectOnBox = false;}// if the collision occurs above the line
+              if (velAlongNormal < 0)
+              {
+                _box.directionalVelocity -= normal *velAlongNormal;
+              }
+               // if (Vector2.Dot(normal, axes[3]) <= 0){ _box.gravityEffectOnBox = true;}
+               // else {_box.gravityEffectOnBox = false;}// if the collision occurs above the line
                 _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
-                 _box.maxForceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
+                 _box.maxForceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction * frictionScale;
                  float velAlongTangent = Vector2.Dot(_box.directionalVelocity, tangent);
-             //   if (Math.Abs(velAlongTangent) > 0.001f)
-           // {
-           //     float frictionMagnitude = Math.Min(Math.Abs(velAlongTangent),_box.maxForceFromFriction);
-           //     _box.directionalVelocity -= tangent*Math.Sign(velAlongTangent)*frictionMagnitude *0.2f;
-           // }         
+                if (Math.Abs(velAlongTangent) > 0.001f)
+            {
+                float frictionMagnitude = Math.Min(Math.Abs(velAlongTangent),_box.maxForceFromFriction);
+                _box.directionalVelocity -= tangent*Math.Sign(velAlongTangent)*frictionMagnitude;
+            }         
            Vector2 contactPoint;
            if (restingOnSurface)
             {
@@ -155,7 +159,7 @@ public class Game1 : Game
             }
             else{
              Vector2[] corners = _box.GetCorners();
-             Vector2 contactPoint = corners[0];
+             contactPoint = corners[0];
 
     float maxProjection = Vector2.Dot(corners[0], normal);
     foreach (var corner in corners)
@@ -179,15 +183,15 @@ public class Game1 : Game
             float angularAcceleration = torque*2 / _box.momentOfInertia;
             if (justCollided == false)
             {
-                _box.angularVelocity += 0.016f *angularAcceleration*4;
+                _box.angularVelocity += angularAcceleration;
                 _box.directionalVelocity+=normal*_box.directionalVelocity.Length()*0.5f;
                 justCollided = true;
             }
-            _box.angularVelocity += angularAcceleration * 0.016f; // scale for 60fps  
+            _box.angularVelocity += angularAcceleration; // scale for 60fps  
             
         }
-        else
-            {_box.gravityEffectOnBox = true;}
+        //else
+           // {_box.gravityEffectOnBox = true;}
         
 
 

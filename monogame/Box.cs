@@ -19,7 +19,6 @@ public class BoxObject
     public float angularVelocity;
     public float momentOfInertia;
     public float gravity;
-    public float horizontalAcceleration;
   public float verticalVelocity;
     public float horizontalVelocity;
     public Vector2 directionalVelocity;
@@ -33,15 +32,14 @@ public class BoxObject
     public float normalReactionForce;
     public float mass;
     public float boxScale { get; set; } = 1f;
-    public bool gravityEffectOnBox;
-    public float gravityScale { get; set; } = 0.1f;
+
 
     public BoxObject(Texture2D texture, Vector2 initialPosition)
     {
         _texture = texture;
         _bounds = new Rectangle(0, 0, 100, 100);
         _centreOfBox = initialPosition;
-        gravity = 10;
+        gravity = 1; // when gravity is 1, g=10m/s^2
         verticalVelocity = 0;
         horizontalVelocity = 0;
         edgeTrigger = false;
@@ -49,10 +47,9 @@ public class BoxObject
         isMoving = false;
         resolvedSpeed = 0;
         normalReactionForce = 0f;
-        coefficientOfFriction = 0.05f;
-        maxForceFromFriction = 0;
+        coefficientOfFriction = 10f;
         mass = 1;
-        gravityEffectOnBox = true;
+
         angularVelocity = 0f;
         directionalVelocity = new Vector2(0,0);
         momentOfInertia = (mass*(_bounds.Width*_bounds.Width + _bounds.Height*_bounds.Height)/12);
@@ -87,9 +84,9 @@ public class BoxObject
 
         if (_centreOfBox.Y + _bounds.Height / 2 < window.ClientBounds.Height && mouse.LeftButton == ButtonState.Released)
         {
-            //if (gravityEffectOnBox)
             {
-                directionalVelocity.Y += mass * (gravity * gravityScale);
+                float forceFromGravity = mass * (gravity);
+                directionalVelocity.Y += gravity ;
             }
 
             if (directionalVelocity.Y < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)
