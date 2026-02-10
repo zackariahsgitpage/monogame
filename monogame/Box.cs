@@ -19,6 +19,7 @@ public class BoxObject
     public float angularVelocity;
     public float momentOfInertia;
     public float gravity;
+    public float forceFromGravity;
   public float verticalVelocity;
     public float horizontalVelocity;
     public Vector2 directionalVelocity;
@@ -85,7 +86,7 @@ public class BoxObject
         if (_centreOfBox.Y + _bounds.Height / 2 < window.ClientBounds.Height && mouse.LeftButton == ButtonState.Released)
         {
             {
-                float forceFromGravity = mass * (gravity);
+                forceFromGravity = mass * (gravity);
                 directionalVelocity.Y += gravity ;
             }
 
