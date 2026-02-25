@@ -51,7 +51,7 @@ public class BoxObject
         isMoving = false;
         resolvedSpeed = 0;
         normalReactionForce = 0f;
-        coefficientOfFriction = 10f;
+        coefficientOfFriction = 0.1f;
         mass = 1;
         torque = 0f;
         angularVelocity = 0f;
@@ -98,13 +98,14 @@ public class BoxObject
                 directionalVelocity.Y += gravity ;
             }
             }
-
             if (directionalVelocity.Y < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)
             {
                 directionalVelocity.Y = 0;
             }
-           
+           if (affectOfGravity)
+           {
             _centreOfBox.Y += directionalVelocity.Y;
+           }
         }
         else
         {

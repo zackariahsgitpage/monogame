@@ -132,13 +132,20 @@ public class Game1 : Game
             {
                 mtv = -mtv;
             }
-              Vector2 normal = Vector2.Normalize(mtv);
+              Vector2 normal = mtv;
+              if (mtv.Length() > 0.001f )
+              {
+                normal = Vector2.Normalize(mtv);
+              }
               Vector2 tangent = new Vector2(-normal.Y,normal.X);
               float velAlongNormal = Vector2.Dot(_box.directionalVelocity, normal);
 
             bool flatOnSurface = Math.Abs(velAlongNormal) < 0.05f &&  Math.Abs(_box.angularVelocity) < 0.1f;
               
-              _box.Translate(mtv);
+              if (mtv.LengthSquared() < 10000) // Prevent huge translations from NaN
+              {
+                  _box.Translate(mtv);
+              }
             //_box.directionalVelocity*= -0.1f;
                 if (velAlongNormal < 0)
 {
@@ -148,24 +155,21 @@ public class Game1 : Game
                  _box.maxForceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
                  float forceDownSlope = (float)(_box.mass * _box.gravity * Math.Abs(Math.Sin(lineRotation)));
                  float velAlongTangent = Vector2.Dot(_box.directionalVelocity, tangent);
-                 if (forceDownSlope <= _box.maxForceFromFriction &&
-    Math.Abs(velAlongTangent) < 0.2f) // small velocity threshold
+                 if (forceDownSlope <= _box.maxForceFromFriction && Math.Abs(velAlongTangent) < 0.01f)
 {
     // cancel all motion along surface
     _box.directionalVelocity -= tangent * velAlongTangent;
-    
+    _box.affectOfGravity = false; // Disable gravity when friction holds the box  
 }
 else
 {
-    float frictionMagnitude = _box.maxForceFromFriction * dt;
-    _box.directionalVelocity -= tangent * Math.Sign(velAlongTangent) * frictionMagnitude;
+    _box.affectOfGravity = true; // Re-enable gravity when friction can't hold the box
+    if (!float.IsNaN(velAlongTangent))
+    {
+        float frictionMagnitude = _box.maxForceFromFriction;
+        _box.directionalVelocity -= tangent * Math.Sign(velAlongTangent) * frictionMagnitude;
+    }
 }
-           // if (Math.Abs(velAlongTangent) > 0.001f)
-           // {
-            //    float frictionMagnitude = Math.Min(Math.Abs(velAlongTangent), _box.maxForceFromFriction) *0.2f;
-           //     _box.directionalVelocity -= tangent * Math.Sign(velAlongTangent) * frictionMagnitude;
-           // }
-       
            Vector2 contactPoint;
            if (flatOnSurface)
             {
@@ -219,9 +223,10 @@ else
         }
        //lse
        //   {_box.gravityEffectOnBox = true;}
-        
-
-
+        else
+        {
+            _box.affectOfGravity = true; // Re-enable gravity when not colliding
+        }
             // TODO: Add your update logic here
 
             base.Update(gameTime);
