@@ -19,6 +19,7 @@ public class BoxObject
     public float angularVelocity;
     public float momentOfInertia;
     public float gravity;
+    public bool affectOfGravity;
     public float forceFromGravity;
   public float verticalVelocity;
     public float horizontalVelocity;
@@ -33,6 +34,8 @@ public class BoxObject
     public float normalReactionForce;
     public float mass;
     public float boxScale { get; set; } = 1f;
+    public float angularAcceleration;
+    public float torque;
 
 
     public BoxObject(Texture2D texture, Vector2 initialPosition)
@@ -50,10 +53,11 @@ public class BoxObject
         normalReactionForce = 0f;
         coefficientOfFriction = 10f;
         mass = 1;
-
+        torque = 0f;
         angularVelocity = 0f;
         directionalVelocity = new Vector2(0,0);
         momentOfInertia = (mass*(_bounds.Width*_bounds.Width + _bounds.Height*_bounds.Height)/12);
+        affectOfGravity = true;
     }
 
     public void Update(GameWindow window)
@@ -81,13 +85,18 @@ public class BoxObject
             directionalVelocity+= new Vector2((_mousePointAfterRelease.X - _mousePointBeforeRelease.X)/5,(_mousePointAfterRelease.Y - _mousePointBeforeRelease.Y)/5);
             edgeTrigger = false;
             angularVelocity=0;
+            angularAcceleration=0;
+            torque=0;
         }
 
         if (_centreOfBox.Y + _bounds.Height / 2 < window.ClientBounds.Height && mouse.LeftButton == ButtonState.Released)
         {
             {
                 forceFromGravity = mass * (gravity);
+                if (affectOfGravity)
+                {
                 directionalVelocity.Y += gravity ;
+            }
             }
 
             if (directionalVelocity.Y < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)
@@ -112,7 +121,7 @@ public class BoxObject
         {
             directionalVelocity.X = 0;
         }
-    angularVelocity *= 0.98f;
+    angularVelocity *= 0.9f; 
     rotation-= angularVelocity;
     
     }

@@ -37,10 +37,6 @@ public class LineObject
         {
             Rotation -=MathHelper.ToRadians(1f);
         }
-          if (keyboard.IsKeyDown(Keys.P))
-        {
-            Rotation +=100;
-        }
          if (keyboard.IsKeyDown(Keys.Right))
         {
          Position.X+=10;
