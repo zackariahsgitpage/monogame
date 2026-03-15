@@ -2,9 +2,11 @@
 using System.Diagnostics.Metrics;
 using System.Security.Cryptography;
 using System.Xml;
+using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.ImGuiNet;
 
 namespace monogame;
 
@@ -13,6 +15,7 @@ public class Game1 : Game
     //screen is 760x420
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
+    public static ImGuiRenderer GuiRenderer;
     private BoxObject _box;
     Texture2D _BlackTexture;
     LineObject _line;
@@ -23,6 +26,7 @@ public class Game1 : Game
      bool justCollided = true;
     SpriteFont font;
     float dt = 0.016f;
+    private bool _guiActive;
     
 
   public static class SATHelper
@@ -87,6 +91,8 @@ public class Game1 : Game
     {
         // TODO: Add your initialization logic here
         positionOfLine=new Vector2(200, 400);
+        GuiRenderer = new ImGuiRenderer(this);
+        _guiActive = true;
         base.Initialize();  
 
     }
@@ -99,11 +105,18 @@ public class Game1 : Game
         _box = new BoxObject(_BlackTexture, new Vector2(0, 0));
         _line = new LineObject(_BlackTexture, new Vector2(200, 400), new Rectangle(0, 0, 400, 10), 30);
         _line.Origin = new Vector2(_line.SourceRect.Width / 2f, _line.SourceRect.Height / 2f);
+        GuiRenderer.RebuildFontAtlas();
+
         // TODO: use this.Content to load your game content here
     }
 
     protected override void Update(GameTime gameTime)
     {
+        KeyboardState keyboard = Keyboard.GetState();
+        if (keyboard.IsKeyDown(Keys.M))
+        {
+            _guiActive = true;
+        }
           lineRotation = _line.Rotation;
         axes = new Vector2[]
         {
@@ -241,8 +254,26 @@ else
        _spriteBatch.DrawString(font, $"Speed: {_box.directionalVelocity.Length():F2}", new Vector2(0,0),Color.Black);
        _box.Draw(_spriteBatch);
         _spriteBatch.End();
-        // TODO: Add your drawing code here
-
         base.Draw(gameTime);
+
+        GuiRenderer.BeginLayout(gameTime);
+        if (_guiActive)
+{
+    ImGui.Begin("My First Tool", ref _guiActive, ImGuiWindowFlags.MenuBar);
+    if (ImGui.BeginMenuBar())
+    {
+        ImGui.SliderFloat("ofmangoes", ref _box.coefficientOfFriction, 0.0f, 1.0f);
+        if (ImGui.BeginMenu("File"))
+        {
+            if (ImGui.MenuItem("Open..", "Ctrl+O")) { /* Do stuff */ }
+            if (ImGui.MenuItem("Save", "Ctrl+S")) { /* Do stuff */ }
+            if (ImGui.MenuItem("Close", "Ctrl+W")) { _guiActive = false; }
+            ImGui.EndMenu();
+        }
+        ImGui.EndMenuBar();
+    }
+    ImGui.End();
+}
+        GuiRenderer.EndLayout();
     }
 }

@@ -28,7 +28,7 @@ public class BoxObject
     public float coefficientOfFriction;
 
     public float rotation;
-    private bool edgeTrigger;
+    private bool mouseHeld;
     private bool isMoving;
     private float resolvedSpeed;
     public float normalReactionForce;
@@ -46,12 +46,12 @@ public class BoxObject
         gravity = 1; // when gravity is 1, g=10m/s^2
         verticalVelocity = 0;
         horizontalVelocity = 0;
-        edgeTrigger = false;
+        mouseHeld = false;
         rotation = 0f;
         isMoving = false;
         resolvedSpeed = 0;
         normalReactionForce = 0f;
-        coefficientOfFriction = 0.1f;
+        coefficientOfFriction = 0.5f;
         mass = 1;
         torque = 0f;
         angularVelocity = 0f;
@@ -70,26 +70,26 @@ public class BoxObject
         { isMoving = true; }
         else
         { isMoving = false; }
-        if (mouse.LeftButton == ButtonState.Pressed)
+        if (mouse.LeftButton == ButtonState.Pressed && (BoundingBox.Contains(mouse.Position) || mouseHeld) )//&& mouse.X < _bounds.Width && mouse.X > _centreOfBox.X - _bounds.Width/2 && mouse.Y < _bounds.Height && mouse.Y > _centreOfBox.Y - _bounds.Height/2)
         {
             _centreOfBox = mouse.Position.ToVector2();
             _mousePointBeforeRelease.X = mouse.X;
             _mousePointBeforeRelease.Y = mouse.Y;
-            edgeTrigger = true;
+            mouseHeld = true;
             rotation = 0f;
         }
-        if (mouse.LeftButton == ButtonState.Released && edgeTrigger)
+        if (mouse.LeftButton == ButtonState.Released && mouseHeld)
         {
             _mousePointAfterRelease.X = mouse.X;
             _mousePointAfterRelease.Y = mouse.Y;
             directionalVelocity+= new Vector2((_mousePointAfterRelease.X - _mousePointBeforeRelease.X)/5,(_mousePointAfterRelease.Y - _mousePointBeforeRelease.Y)/5);
-            edgeTrigger = false;
+            mouseHeld = false;
             angularVelocity=0;
             angularAcceleration=0;
             torque=0;
         }
 
-        if (_centreOfBox.Y + _bounds.Height / 2 < window.ClientBounds.Height && mouse.LeftButton == ButtonState.Released)
+        if (_centreOfBox.Y + _bounds.Height / 2 < window.ClientBounds.Height && !mouseHeld)
         {
             {
                 forceFromGravity = mass * (gravity);
