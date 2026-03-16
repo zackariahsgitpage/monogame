@@ -20,6 +20,8 @@ public class Game1 : Game
     Texture2D _BlackTexture;
     LineObject _line;
     Vector2 tempVelocity;
+    float[] speedValues;
+    int speedIncrement = 0;
     float lineRotation;
     Vector2 positionOfLine;
     Vector2[] axes;
@@ -93,6 +95,7 @@ public class Game1 : Game
         positionOfLine=new Vector2(200, 400);
         GuiRenderer = new ImGuiRenderer(this);
         _guiActive = true;
+        speedValues = new float[100];
         base.Initialize();  
 
     }
@@ -112,6 +115,11 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
+        
+        speedValues[speedIncrement] = _box.directionalVelocity.Length();
+        speedIncrement++;
+        speedIncrement = speedIncrement % 100;
+        
         KeyboardState keyboard = Keyboard.GetState();
         if (keyboard.IsKeyDown(Keys.M))
         {
@@ -179,8 +187,9 @@ else
     _box.affectOfGravity = true; // Re-enable gravity when friction can't hold the box
     if (!float.IsNaN(velAlongTangent))
     {
-        float frictionMagnitude = _box.maxForceFromFriction;
-        _box.directionalVelocity -= tangent * Math.Sign(velAlongTangent) * frictionMagnitude;
+        float frictionForce = _box.maxForceFromFriction;
+        float frictionAcceleration = frictionForce / _box.mass;
+        _box.directionalVelocity -= tangent * Math.Sign(velAlongTangent) * frictionAcceleration;
     }
 }
            Vector2 contactPoint;
@@ -262,7 +271,7 @@ else
     ImGui.Begin("My First Tool", ref _guiActive, ImGuiWindowFlags.MenuBar);
     if (ImGui.BeginMenuBar())
     {
-        ImGui.SliderFloat("ofmangoes", ref _box.coefficientOfFriction, 0.0f, 1.0f);
+        ImGui.SliderFloat("Coefficient of friction", ref _box.coefficientOfFriction, 0.0f, 1.0f);
         if (ImGui.BeginMenu("File"))
         {
             if (ImGui.MenuItem("Open..", "Ctrl+O")) { /* Do stuff */ }

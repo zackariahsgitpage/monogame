@@ -52,7 +52,7 @@ public class BoxObject
         resolvedSpeed = 0;
         normalReactionForce = 0f;
         coefficientOfFriction = 0.5f;
-        mass = 1;
+        mass = 10;
         torque = 0f;
         angularVelocity = 0f;
         directionalVelocity = new Vector2(0,0);
