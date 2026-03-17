@@ -70,7 +70,7 @@ public class BoxObject
         { isMoving = true; }
         else
         { isMoving = false; }
-        if (mouse.LeftButton == ButtonState.Pressed && (BoundingBox.Contains(mouse.Position) || mouseHeld) )//&& mouse.X < _bounds.Width && mouse.X > _centreOfBox.X - _bounds.Width/2 && mouse.Y < _bounds.Height && mouse.Y > _centreOfBox.Y - _bounds.Height/2)
+        if (mouse.LeftButton == ButtonState.Pressed && (BoundingBox.Contains(mouse.Position) || mouseHeld) )
         {
             _centreOfBox = mouse.Position.ToVector2();
             _mousePointBeforeRelease.X = mouse.X;
@@ -166,6 +166,14 @@ public class BoxObject
             );
         }
         
+    }
+    public int GetWidth()
+    {
+        return _bounds.Width;
+    }
+    public int GetHeight()
+    {
+        return _bounds.Height;
     }
 
 

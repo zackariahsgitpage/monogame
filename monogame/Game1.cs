@@ -17,16 +17,15 @@ public class Game1 : Game
     private SpriteBatch _spriteBatch;
     public static ImGuiRenderer GuiRenderer;
     private BoxObject _box;
-    Texture2D _BlackTexture;
+    Texture2D _blackTexture;
     LineObject _line;
-    Vector2 tempVelocity;
-    float[] speedValues;
-    int speedIncrement = 0;
+    Texture2D _arrowTexture;
+    Rectangle _arrow;
     float lineRotation;
     Vector2 positionOfLine;
     Vector2[] axes;
      bool justCollided = true;
-    SpriteFont font;
+    SpriteFont _font;
     float dt = 0.016f;
     private bool _guiActive;
     
@@ -57,7 +56,7 @@ public class Game1 : Game
 
                 if (projectionA[1] < projectionB[0] || projectionB[1] < projectionA[0])
                 {
-                    return (false, Vector2.Zero); // Found a separating axis
+                    return (false, Vector2.Zero);
                 }
                 float overlap = Math.Min(projectionA[1], projectionB[1]) - Math.Max(projectionA[0], projectionB[0]);
                 if (overlap < smallestOverlap)
@@ -83,7 +82,7 @@ public class Game1 : Game
     {
         _graphics = new GraphicsDeviceManager(this);
         _graphics.PreferredBackBufferWidth = 1024; 
-        _graphics.PreferredBackBufferHeight = 768;
+        _graphics.PreferredBackBufferHeight = 800;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
@@ -95,18 +94,19 @@ public class Game1 : Game
         positionOfLine=new Vector2(200, 400);
         GuiRenderer = new ImGuiRenderer(this);
         _guiActive = true;
-        speedValues = new float[100];
         base.Initialize();  
 
     }
 
     protected override void LoadContent()
     {
-        font = Content.Load<SpriteFont>("File");
+        _font = Content.Load<SpriteFont>("File");
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        _BlackTexture = Content.Load<Texture2D>("blacksquare");
-        _box = new BoxObject(_BlackTexture, new Vector2(0, 0));
-        _line = new LineObject(_BlackTexture, new Vector2(200, 400), new Rectangle(0, 0, 400, 10), 30);
+        _blackTexture = Content.Load<Texture2D>("blacksquare");
+        _arrowTexture = Content.Load<Texture2D>("redarrow");
+        _arrow = new Rectangle(0,0,50,100);
+        _box = new BoxObject(_blackTexture, new Vector2(0, 0));
+        _line = new LineObject(_blackTexture, new Vector2(200, 400), new Rectangle(0, 0, 400, 10), 0);
         _line.Origin = new Vector2(_line.SourceRect.Width / 2f, _line.SourceRect.Height / 2f);
         GuiRenderer.RebuildFontAtlas();
 
@@ -115,11 +115,8 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
-        
-        speedValues[speedIncrement] = _box.directionalVelocity.Length();
-        speedIncrement++;
-        speedIncrement = speedIncrement % 100;
-        
+        _arrow.X = (int)_box._centreOfBox.X;
+        _arrow.Y = (int)_box._centreOfBox.Y + _box.GetHeight();  
         KeyboardState keyboard = Keyboard.GetState();
         if (keyboard.IsKeyDown(Keys.M))
         {
@@ -169,19 +166,19 @@ public class Game1 : Game
               }
             //_box.directionalVelocity*= -0.1f;
                 if (velAlongNormal < 0)
-{
-    _box.directionalVelocity -= normal * velAlongNormal;
-}
+                {
+                    _box.directionalVelocity -= normal * velAlongNormal;
+                }
                 _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
                  _box.maxForceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
                  float forceDownSlope = (float)(_box.mass * _box.gravity * Math.Abs(Math.Sin(lineRotation)));
                  float velAlongTangent = Vector2.Dot(_box.directionalVelocity, tangent);
                  if (forceDownSlope <= _box.maxForceFromFriction && Math.Abs(velAlongTangent) < 0.01f)
-{
-    // cancel all motion along surface
-    _box.directionalVelocity -= tangent * velAlongTangent;
-    _box.affectOfGravity = false; // Disable gravity when friction holds the box  
-}
+                {
+                 // cancel all motion along surface
+                 _box.directionalVelocity -= tangent * velAlongTangent;
+                 _box.affectOfGravity = false; // Disable gravity when friction holds the box  
+                }           
 else
 {
     _box.affectOfGravity = true; // Re-enable gravity when friction can't hold the box
@@ -260,23 +257,34 @@ else
         GraphicsDevice.Clear(Color.CornflowerBlue);
         _spriteBatch.Begin();
         _line.Draw(_spriteBatch);
-       _spriteBatch.DrawString(font, $"Speed: {_box.directionalVelocity.Length():F2}", new Vector2(0,0),Color.Black);
+       _spriteBatch.DrawString(_font, $"Speed: {_box.directionalVelocity.Length():F2}", new Vector2(0,0),Color.Black);
        _box.Draw(_spriteBatch);
+       _spriteBatch.Draw(
+         _arrowTexture,
+           new Vector2(_arrow.X, _arrow.Y),
+           null, 
+          Color.Red,
+          MathHelper.ToRadians(180f),
+          new Vector2(_arrowTexture.Width / 2f, _arrowTexture.Height / 2f),
+             0.05f,
+          SpriteEffects.None,
+            0f
+            );
         _spriteBatch.End();
         base.Draw(gameTime);
 
         GuiRenderer.BeginLayout(gameTime);
         if (_guiActive)
 {
-    ImGui.Begin("My First Tool", ref _guiActive, ImGuiWindowFlags.MenuBar);
-    if (ImGui.BeginMenuBar())
+    if (ImGui.BeginMainMenuBar())
     {
-        ImGui.SliderFloat("Coefficient of friction", ref _box.coefficientOfFriction, 0.0f, 1.0f);
-        if (ImGui.BeginMenu("File"))
+        if (ImGui.BeginMenu("Box properties"))
         {
-            if (ImGui.MenuItem("Open..", "Ctrl+O")) { /* Do stuff */ }
-            if (ImGui.MenuItem("Save", "Ctrl+S")) { /* Do stuff */ }
-            if (ImGui.MenuItem("Close", "Ctrl+W")) { _guiActive = false; }
+           // if (ImGui.MenuItem("Open..", "Ctrl+O")) { /* Do stuff */ }
+           // if (ImGui.MenuItem("Save", "Ctrl+S")) { /* Do stuff */ }
+           // if (ImGui.MenuItem("Close", "Ctrl+W")) { _guiActive = false; }
+            ImGui.SliderFloat("Coefficient of friction", ref _box.coefficientOfFriction, 0.0f, 1.0f);
+            ImGui.SliderFloat("Mass", ref _box.mass, 0.0f, 100f);
             ImGui.EndMenu();
         }
         ImGui.EndMenuBar();

@@ -1,3 +1,4 @@
 Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
 "C:/zacksgitpagerepo/monogame/monogame/Content/blacksquare.jpg","C:/zacksgitpagerepo/monogame/monogame/Content/bin/DesktopGL/Content/blacksquare.xnb","TextureProcessor","Texture2DContent",22328,14128577,0.365946
 "C:/zacksgitpagerepo/monogame/monogame/Content/File.spritefont","C:/zacksgitpagerepo/monogame/monogame/Content/bin/DesktopGL/Content/File.xnb","FontDescriptionProcessor","SpriteFontContent",2068,21529,0.0671068
+"C:/zacksgitpagerepo/monogame/monogame/Content/redarrow.png","C:/zacksgitpagerepo/monogame/monogame/Content/bin/DesktopGL/Content/redarrow.xnb","TextureProcessor","Texture2DContent",20483,6106885,0.2256682
