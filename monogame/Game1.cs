@@ -102,8 +102,8 @@ public class Game1 : Game
         font = Content.Load<SpriteFont>("File");
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _BlackTexture = Content.Load<Texture2D>("blacksquare");
-        _box = new BoxObject(_BlackTexture, new Vector2(0, 0));
-        _line = new LineObject(_BlackTexture, new Vector2(200, 400), new Rectangle(0, 0, 400, 10), 30);
+        _box = new BoxObject(_BlackTexture, new Vector2(100, 100));
+        _line = new LineObject(_BlackTexture, new Vector2(200, 400), new Rectangle(0, 0, 400, 10), 0);
         _line.Origin = new Vector2(_line.SourceRect.Width / 2f, _line.SourceRect.Height / 2f);
         GuiRenderer.RebuildFontAtlas();
 
@@ -133,7 +133,7 @@ public class Game1 : Game
         axes[2] = new Vector2(1, 0);  
         axes[3] = new Vector2(0, 1);  
         var result = SATHelper.CollisionData(_box.GetCorners(), _line.GetCorners(), axes);
-        if (_box.directionalVelocity.Length()<0.5)
+        if (_box.boxVelocity.Length()<0.5)
         {
             justCollided = false;
         }
@@ -151,7 +151,7 @@ public class Game1 : Game
                 normal = Vector2.Normalize(mtv);
               }
               Vector2 tangent = new Vector2(-normal.Y,normal.X);
-              float velAlongNormal = Vector2.Dot(_box.directionalVelocity, normal);
+              float velAlongNormal = Vector2.Dot(_box.boxVelocity, normal);
 
             bool flatOnSurface = Math.Abs(velAlongNormal) < 0.05f &&  Math.Abs(_box.angularVelocity) < 0.1f;
               
@@ -162,16 +162,16 @@ public class Game1 : Game
             //_box.directionalVelocity*= -0.1f;
                 if (velAlongNormal < 0)
 {
-    _box.directionalVelocity -= normal * velAlongNormal;
+    _box.boxVelocity -= normal * velAlongNormal;
 }
                 _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
                  _box.maxForceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
                  float forceDownSlope = (float)(_box.mass * _box.gravity * Math.Abs(Math.Sin(lineRotation)));
-                 float velAlongTangent = Vector2.Dot(_box.directionalVelocity, tangent);
+                 float velAlongTangent = Vector2.Dot(_box.boxVelocity, tangent);
                  if (forceDownSlope <= _box.maxForceFromFriction && Math.Abs(velAlongTangent) < 0.01f)
 {
     // cancel all motion along surface
-    _box.directionalVelocity -= tangent * velAlongTangent;
+    _box.boxVelocity -= tangent * velAlongTangent;
     _box.affectOfGravity = false; // Disable gravity when friction holds the box  
 }
 else
@@ -180,7 +180,7 @@ else
     if (!float.IsNaN(velAlongTangent))
     {
         float frictionMagnitude = _box.maxForceFromFriction;
-        _box.directionalVelocity -= tangent * Math.Sign(velAlongTangent) * frictionMagnitude;
+        _box.boxVelocity -= tangent * Math.Sign(velAlongTangent) * frictionMagnitude;
     }
 }
            Vector2 contactPoint;
@@ -251,7 +251,7 @@ else
         GraphicsDevice.Clear(Color.CornflowerBlue);
         _spriteBatch.Begin();
         _line.Draw(_spriteBatch);
-       _spriteBatch.DrawString(font, $"Speed: {_box.directionalVelocity.Length():F2}", new Vector2(0,0),Color.Black);
+       _spriteBatch.DrawString(font, $"Speed: {_box.boxVelocity.Length():F2}", new Vector2(0,0),Color.Black);
        _box.Draw(_spriteBatch);
         _spriteBatch.End();
         base.Draw(gameTime);
