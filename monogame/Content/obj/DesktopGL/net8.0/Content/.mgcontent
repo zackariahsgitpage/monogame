@@ -4,10 +4,17 @@
   <Platform>DesktopGL</Platform>
   <Config />
   <SourceFiles>
+<<<<<<< HEAD
     <File>C:/Users/zack/.vscode/codeForSchool/monogame/monogame/monogame/Content/blacksquare.jpg</File>
     <File>C:/Users/zack/.vscode/codeForSchool/monogame/monogame/monogame/Content/File.spritefont</File>
+=======
+    <File>C:/zacksgitpagerepo/monogame/monogame/Content/blacksquare.jpg</File>
+    <File>C:/zacksgitpagerepo/monogame/monogame/Content/File.spritefont</File>
+    <File>C:/zacksgitpagerepo/monogame/monogame/Content/redarrow.png</File>
+>>>>>>> 3bc8d4abf70d97434cfe374d3d2c8100cc186847
   </SourceFiles>
   <DestFiles>
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
   </DestFiles>
