@@ -21,6 +21,7 @@ public class BoxObject
     public float gravity;
     public bool affectOfGravity;
     public float forceFromGravity;
+    private float gravityScale;
  
     public Vector2 boxVelocity;
     public float maxForceFromFriction;
@@ -42,7 +43,8 @@ public class BoxObject
         _texture = texture;
         _bounds = new Rectangle(0, 0, 100, 100);
         _centreOfBox = initialPosition;
-        gravity = 0.98f; // when gravity is 1, g=10m/s^2
+        gravity = 9.8f; // when gravity is 1, g=10m/s^2
+        gravityScale = 0.1f;
         mouseHeld = false;
         rotation = 0f;
         isMoving = false;
@@ -92,7 +94,7 @@ public class BoxObject
                 forceFromGravity = mass * (gravity);
                 if (affectOfGravity)
                 {
-                boxVelocity.Y += gravity ;
+                boxVelocity.Y += gravity*gravityScale ;
             }
             }
             if (boxVelocity.Y < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)

@@ -20,7 +20,7 @@ public class Game1 : Game
     Texture2D _blackTexture;
     LineObject _line;
     Texture2D _arrowTexture;
-    Rectangle _arrow;
+    Rectangle[] _arrow;
     float lineRotation;
     Vector2 positionOfLine;
     Vector2[] axes;
@@ -95,7 +95,6 @@ public class Game1 : Game
         GuiRenderer = new ImGuiRenderer(this);
         _guiActive = true;
         base.Initialize();  
-
     }
 
     protected override void LoadContent()
@@ -104,7 +103,11 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _blackTexture = Content.Load<Texture2D>("blacksquare");
         _arrowTexture = Content.Load<Texture2D>("redarrow");
-        _arrow = new Rectangle(0,0,50,100);
+        _arrow = new Rectangle[3];
+        for (int i = 0; i < 3; i++)
+        {
+        _arrow[i] = new Rectangle(0,0,50,100);
+        }
         _box = new BoxObject(_blackTexture, new Vector2(0, 0));
         _line = new LineObject(_blackTexture, new Vector2(200, 400), new Rectangle(0, 0, 400, 10), 0);
         _line.Origin = new Vector2(_line.SourceRect.Width / 2f, _line.SourceRect.Height / 2f);
@@ -115,8 +118,11 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
-        _arrow.X = (int)_box._centreOfBox.X;
-        _arrow.Y = (int)_box._centreOfBox.Y + _box.GetHeight();  
+        for (int i = 0; i < _arrow.Length; i++ )
+        {
+           _arrow[i].X = (int)_box._centreOfBox.X; 
+        }
+        _arrow[0].Y = (int)_box._centreOfBox.Y + _box.GetHeight();  
         KeyboardState keyboard = Keyboard.GetState();
         if (keyboard.IsKeyDown(Keys.M))
         {
@@ -167,7 +173,7 @@ public class Game1 : Game
             //_box.directionalVelocity*= -0.1f;
                 if (velAlongNormal < 0)
                 {
-                    _box.directionalVelocity -= normal * velAlongNormal;
+                    _box.boxVelocity -= normal * velAlongNormal;
                 }
                 _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
                  _box.maxForceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
@@ -176,7 +182,7 @@ public class Game1 : Game
                  if (forceDownSlope <= _box.maxForceFromFriction && Math.Abs(velAlongTangent) < 0.01f)
                 {
                  // cancel all motion along surface
-                 _box.directionalVelocity -= tangent * velAlongTangent;
+                 _box.boxVelocity -= tangent * velAlongTangent;
                  _box.affectOfGravity = false; // Disable gravity when friction holds the box  
                 }           
 else
@@ -186,7 +192,7 @@ else
     {
         float frictionForce = _box.maxForceFromFriction;
         float frictionAcceleration = frictionForce / _box.mass;
-        _box.directionalVelocity -= tangent * Math.Sign(velAlongTangent) * frictionAcceleration;
+        _box.boxVelocity -= tangent * Math.Sign(velAlongTangent) * frictionAcceleration;
     }
 }
            Vector2 contactPoint;
@@ -236,12 +242,10 @@ else
             }
 else
 {
-           _box.angularVelocity += _box.angularAcceleration; // scale for 60fps 
+           _box.angularVelocity += _box.angularAcceleration; 
         } 
             
         }
-       //lse
-       //   {_box.gravityEffectOnBox = true;}
         else
         {
             _box.affectOfGravity = true; // Re-enable gravity when not colliding
@@ -257,11 +261,11 @@ else
         GraphicsDevice.Clear(Color.CornflowerBlue);
         _spriteBatch.Begin();
         _line.Draw(_spriteBatch);
-       _spriteBatch.DrawString(_font, $"Speed: {_box.directionalVelocity.Length():F2}", new Vector2(0,0),Color.Black);
+       _spriteBatch.DrawString(_font, $"Speed: {_box.boxVelocity.Length():F2}", new Vector2(0,0),Color.Black);
        _box.Draw(_spriteBatch);
        _spriteBatch.Draw(
          _arrowTexture,
-           new Vector2(_arrow.X, _arrow.Y),
+           new Vector2(_arrow[0].X, _arrow[0].Y),
            null, 
           Color.Red,
           MathHelper.ToRadians(180f),
@@ -270,6 +274,7 @@ else
           SpriteEffects.None,
             0f
             );
+        _spriteBatch.DrawString(_font, $"{_box.forceFromGravity:F2}N",new Vector2(_arrow[0].X,_arrow[0].Y),Color.White);
         _spriteBatch.End();
         base.Draw(gameTime);
 
