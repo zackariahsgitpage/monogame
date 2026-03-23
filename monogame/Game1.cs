@@ -138,7 +138,7 @@ public class Game1 : Game
         axes[2] = new Vector2(1, 0);  
         axes[3] = new Vector2(0, 1);  
         var result = SATHelper.CollisionData(_box.GetCorners(), _line.GetCorners(), axes);
-        if (_box.directionalVelocity.Length()<0.5)
+        if (_box.boxVelocity.Length()<0.5)
         {
             justCollided = false;
         }
@@ -156,7 +156,7 @@ public class Game1 : Game
                 normal = Vector2.Normalize(mtv);
               }
               Vector2 tangent = new Vector2(-normal.Y,normal.X);
-              float velAlongNormal = Vector2.Dot(_box.directionalVelocity, normal);
+              float velAlongNormal = Vector2.Dot(_box.boxVelocity, normal);
 
             bool flatOnSurface = Math.Abs(velAlongNormal) < 0.05f &&  Math.Abs(_box.angularVelocity) < 0.1f;
               
@@ -172,7 +172,7 @@ public class Game1 : Game
                 _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
                  _box.maxForceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
                  float forceDownSlope = (float)(_box.mass * _box.gravity * Math.Abs(Math.Sin(lineRotation)));
-                 float velAlongTangent = Vector2.Dot(_box.directionalVelocity, tangent);
+                 float velAlongTangent = Vector2.Dot(_box.boxVelocity, tangent);
                  if (forceDownSlope <= _box.maxForceFromFriction && Math.Abs(velAlongTangent) < 0.01f)
                 {
                  // cancel all motion along surface

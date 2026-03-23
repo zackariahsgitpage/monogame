@@ -21,9 +21,8 @@ public class BoxObject
     public float gravity;
     public bool affectOfGravity;
     public float forceFromGravity;
-  public float verticalVelocity;
-    public float horizontalVelocity;
-    public Vector2 directionalVelocity;
+ 
+    public Vector2 boxVelocity;
     public float maxForceFromFriction;
     public float coefficientOfFriction;
 
@@ -43,9 +42,7 @@ public class BoxObject
         _texture = texture;
         _bounds = new Rectangle(0, 0, 100, 100);
         _centreOfBox = initialPosition;
-        gravity = 1; // when gravity is 1, g=10m/s^2
-        verticalVelocity = 0;
-        horizontalVelocity = 0;
+        gravity = 0.98f; // when gravity is 1, g=10m/s^2
         mouseHeld = false;
         rotation = 0f;
         isMoving = false;
@@ -55,7 +52,7 @@ public class BoxObject
         mass = 10;
         torque = 0f;
         angularVelocity = 0f;
-        directionalVelocity = new Vector2(0,0);
+        boxVelocity = new Vector2(0,0);
         momentOfInertia = (mass*(_bounds.Width*_bounds.Width + _bounds.Height*_bounds.Height)/12);
         affectOfGravity = true;
     }
@@ -64,9 +61,9 @@ public class BoxObject
     {
         KeyboardState keyboard = Keyboard.GetState();
         MouseState mouse = Mouse.GetState();
-        resolvedSpeed = directionalVelocity.Length();
+        resolvedSpeed = boxVelocity.Length();
         _centreOfBox = new Vector2(_centreOfBox.X, _centreOfBox.Y);
-        if (verticalVelocity > 0 || horizontalVelocity > 0 || directionalVelocity.Length() > 0)
+        if (boxVelocity.Y> 0 || boxVelocity.X > 0 || boxVelocity.Length() > 0)
         { isMoving = true; }
         else
         { isMoving = false; }
@@ -82,7 +79,7 @@ public class BoxObject
         {
             _mousePointAfterRelease.X = mouse.X;
             _mousePointAfterRelease.Y = mouse.Y;
-            directionalVelocity+= new Vector2((_mousePointAfterRelease.X - _mousePointBeforeRelease.X)/5,(_mousePointAfterRelease.Y - _mousePointBeforeRelease.Y)/5);
+            boxVelocity+= new Vector2((_mousePointAfterRelease.X - _mousePointBeforeRelease.X)/5,(_mousePointAfterRelease.Y - _mousePointBeforeRelease.Y)/5);
             mouseHeld = false;
             angularVelocity=0;
             angularAcceleration=0;
@@ -95,32 +92,32 @@ public class BoxObject
                 forceFromGravity = mass * (gravity);
                 if (affectOfGravity)
                 {
-                directionalVelocity.Y += gravity ;
+                boxVelocity.Y += gravity ;
             }
             }
-            if (directionalVelocity.Y < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)
+            if (boxVelocity.Y < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)
             {
-                directionalVelocity.Y = 0;
+                boxVelocity.Y = 0;
             }
            if (affectOfGravity)
            {
-            _centreOfBox.Y += directionalVelocity.Y;
+            _centreOfBox.Y += boxVelocity.Y;
            }
         }
         else
         {
-            directionalVelocity.Y = 0;
+            boxVelocity.Y = 0;
         }
 
         if (_centreOfBox.X + _bounds.Width / 2 < window.ClientBounds.Width &&
             _centreOfBox.X - _bounds.Width / 2 > 0 &&
             mouse.LeftButton == ButtonState.Released)
         {
-            _centreOfBox.X += directionalVelocity.X;
+            _centreOfBox.X += boxVelocity.X;
         }
         else
         {
-            directionalVelocity.X = 0;
+            boxVelocity.X = 0;
         }
     angularVelocity *= 0.9f; 
     rotation-= angularVelocity;
