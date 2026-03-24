@@ -36,6 +36,10 @@ public class BoxObject
     public float boxScale { get; set; } = 1f;
     public float angularAcceleration;
     public float torque;
+    private float accelerationFromGravity;
+    public float displayedForceFromGravity;
+    private bool boxHeld;
+
 
     public float GetGravity() {return gravity;}
     public void SetGravity(float inputGrav) {gravity = inputGrav;}
@@ -55,18 +59,21 @@ public class BoxObject
         isMoving = false;
         resolvedSpeed = 0;
         normalReactionForce = 0f;
-        coefficientOfFriction = 0.1f;
-        mass = 1;
+        coefficientOfFriction = 0.5f;
+        mass = 1f;
         torque = 0f;
         angularVelocity = 0f;
         boxVelocity = new Vector2(0,0);
-        momentOfInertia = (mass*(_bounds.Width*_bounds.Width + _bounds.Height*_bounds.Height)/12);
         affectOfGravity = true;
+        boxHeld = false;
+        accelerationFromGravity = gravityScale * gravity;
     }
 
     public void Update(GameWindow window)
     {
-        momentOfInertia = (mass*(_bounds.Width*_bounds.Width + _bounds.Height*_bounds.Height)/12);
+        boxHeld = false;
+        displayedForceFromGravity = mass*gravity;
+        momentOfInertia = mass*(_bounds.Width*_bounds.Width + _bounds.Height*_bounds.Height)/12;
         KeyboardState keyboard = Keyboard.GetState();
         MouseState mouse = Mouse.GetState();
         resolvedSpeed = boxVelocity.Length();
@@ -82,6 +89,7 @@ public class BoxObject
             _mousePointBeforeRelease.Y = mouse.Y;
             mouseHeld = true;
             rotation = 0f;
+            boxHeld = true;
         }
         if (mouse.LeftButton == ButtonState.Released && mouseHeld)
         {
@@ -92,15 +100,16 @@ public class BoxObject
             angularVelocity=0;
             angularAcceleration=0;
             torque=0;
+            affectOfGravity = true;
         }
 
         if (_centreOfBox.Y + _bounds.Height / 2 < window.ClientBounds.Height && !mouseHeld)
         {
             {
-                forceFromGravity = mass * (gravity);
+                forceFromGravity = mass * (gravity)*gravityScale;
                 if (affectOfGravity)
                 {
-                boxVelocity.Y += gravity*gravityScale ;
+                boxVelocity.Y += accelerationFromGravity;
             }
             }
             if (boxVelocity.Y < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)
@@ -119,7 +128,7 @@ public class BoxObject
 
         if (_centreOfBox.X + _bounds.Width / 2 < window.ClientBounds.Width &&
             _centreOfBox.X - _bounds.Width / 2 > 0 &&
-            mouse.LeftButton == ButtonState.Released)
+            !boxHeld)
         {
             _centreOfBox.X += boxVelocity.X;
         }

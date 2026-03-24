@@ -172,10 +172,7 @@
           "MonoGame.Framework.DesktopGL": "3.8.4.1"
         },
         "runtime": {
-          "Monogame.ImGuiNet.dll": {
-            "assemblyVersion": "1.1.0.0",
-            "fileVersion": "1.1.0.0"
-          }
+          "Monogame.ImGuiNet.dll": {}
         }
       }
     }

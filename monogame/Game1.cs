@@ -29,7 +29,16 @@ public class Game1 : Game
     SpriteFont _font;
     float dt = 0.016f;
     private bool _guiActive;
-    
+    private float forceDownSlope;
+    private float velAlongTangent;
+    private Vector2 tangent;
+    private float velAlongNormal;
+    private Vector2 normal;
+    private Vector2 north;
+    private float angleBetweenNorthAndFriction;
+    private Vector2 frictionDirection;
+    private float radius = 2700f;
+    private float displayedForceFromFriction;
 
   public static class SATHelper
     {
@@ -79,6 +88,16 @@ public class Game1 : Game
             return (true, mtv);
         }
     }
+    public static float GetAngleBetweenVectors(Vector2 vector1, Vector2 vector2)
+    {
+    vector1.Normalize();
+    vector2.Normalize();
+    float dotProduct = Vector2.Dot(vector1, vector2);
+    dotProduct = MathHelper.Clamp(dotProduct, -1f, 1f);
+    float angleRadians = (float)Math.Acos(dotProduct);
+    return angleRadians;
+    }
+
     public void SaveFile()
     {
 
@@ -100,6 +119,7 @@ public class Game1 : Game
         GuiRenderer = new ImGuiRenderer(this);
         _guiActive = true;
         setMassOfBox = 1f;
+        north = new Vector2 (0,1);
         base.Initialize();  
     }
 
@@ -108,14 +128,14 @@ public class Game1 : Game
         _font = Content.Load<SpriteFont>("File");
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _blackTexture = Content.Load<Texture2D>("blacksquare");
-        _arrowTexture = Content.Load<Texture2D>("redarrow");
+        _arrowTexture = Content.Load<Texture2D>("arrow");
         _arrow = new Rectangle[3];
         for (int i = 0; i < 3; i++)
         {
         _arrow[i] = new Rectangle(0,0,50,100);
         }
         _box = new BoxObject(_blackTexture, new Vector2(0, 0));
-        _line = new LineObject(_blackTexture, new Vector2(200, 400), new Rectangle(0, 0, 400, 10), 0);
+        _line = new LineObject(_blackTexture, new Vector2(200, 400), new Rectangle(0, 0, 800, 10), 0);
         _line.Origin = new Vector2(_line.SourceRect.Width / 2f, _line.SourceRect.Height / 2f);
         GuiRenderer.RebuildFontAtlas();
 
@@ -123,12 +143,22 @@ public class Game1 : Game
     }
     protected override void Update(GameTime gameTime)
     {
+        if (_box.maxForceFromFriction > forceDownSlope)
+        {
+            displayedForceFromFriction = forceDownSlope * 10f;
+        }
+        else
+        {
+            displayedForceFromFriction = _box.maxForceFromFriction * 10f;
+        }
+        
         _box.SetMass(setMassOfBox);
         for (int i = 0; i < _arrow.Length; i++ )
         {
            _arrow[i].X = (int)_box._centreOfBox.X; 
         }
-        _arrow[0].Y = (int)_box._centreOfBox.Y + _box.GetHeight();  
+        _arrow[0].Y = (int)_box._centreOfBox.Y + _box.GetHeight();
+        _arrow[1].Y = (int)_box._centreOfBox.Y - _box.GetHeight(); 
         KeyboardState keyboard = Keyboard.GetState();
         if (keyboard.IsKeyDown(Keys.M))
         {
@@ -156,19 +186,18 @@ public class Game1 : Game
         }
         if (result.IsColliding)
         {
-
             Vector2 mtv = result.MTV;
              if (Vector2.Dot(mtv, _box._centreOfBox - _line.Position) < 0)
             {
                 mtv = -mtv;
             }
-              Vector2 normal = mtv;
+              normal = mtv;
               if (mtv.Length() > 0.001f )
               {
                 normal = Vector2.Normalize(mtv);
               }
-              Vector2 tangent = new Vector2(-normal.Y,normal.X);
-              float velAlongNormal = Vector2.Dot(_box.boxVelocity, normal);
+              tangent = new Vector2(-normal.Y,normal.X);
+             velAlongNormal = Vector2.Dot(_box.boxVelocity, normal);
 
             bool flatOnSurface = Math.Abs(velAlongNormal) < 0.05f &&  Math.Abs(_box.angularVelocity) < 0.1f;
               
@@ -181,14 +210,16 @@ public class Game1 : Game
                 {
                     _box.boxVelocity -= normal * velAlongNormal;
                 }
-                _box.normalReactionForce = (float)(_box.GetGravity() * _box.GetMass() * Math.Abs(Math.Cos(lineRotation)));
+                _box.normalReactionForce = (float)(_box.forceFromGravity * Math.Abs(Math.Cos(lineRotation)));
                  _box.maxForceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
-                 float forceDownSlope = (float)(_box.GetMass() * _box.GetGravity() * Math.Abs(Math.Sin(lineRotation)));
-                 float velAlongTangent = Vector2.Dot(_box.boxVelocity, tangent);
-                 if (forceDownSlope <= _box.maxForceFromFriction && Math.Abs(velAlongTangent) < 0.01f)
+                 forceDownSlope = (float)(_box.forceFromGravity * Math.Abs(Math.Sin(lineRotation)));
+                 velAlongTangent = Vector2.Dot(_box.boxVelocity, tangent);
+
+                if (forceDownSlope <= _box.maxForceFromFriction && Math.Abs(velAlongTangent) < 0.01f
+                  && _box.boxVelocity.Length() < 0.5f)
                 {
                  // cancel all motion along surface
-                 _box.boxVelocity -= tangent * velAlongTangent;
+                 //_box.boxVelocity -= tangent * velAlongTangent;
                  _box.affectOfGravity = false; // Disable gravity when friction holds the box  
                 }           
 else
@@ -224,13 +255,14 @@ else
            Vector2 collisionForce = normal * _box.normalReactionForce;
             Vector2 leverArm = contactPoint - _box._centreOfBox;
             _box.torque = leverArm.X * collisionForce.Y - leverArm.Y * collisionForce.X;
+         
             if (flatOnSurface)
             {
                 _box.angularVelocity = 0f;
                 _box.torque = 0f;
             } 
             float angleDifference = Math.Abs(_box.rotation - lineRotation);
-            _box.angularAcceleration = _box.torque / _box.momentOfInertia;
+            _box.angularAcceleration = _box.torque / (_box.momentOfInertia *2);
             if (justCollided == false)
             {
                 if (angleDifference > MathHelper.ToRadians(3f))
@@ -245,17 +277,20 @@ else
             {
                  _box.rotation = lineRotation; 
                 _box.angularVelocity = 0f;
-            }
-else
-{
+           }          
+        else
+        {
            _box.angularVelocity += _box.angularAcceleration; 
         } 
             
         }
-        else
+       else
         {
-            _box.affectOfGravity = true; // Re-enable gravity when not colliding
+            _box.affectOfGravity = true;
+          _box.angularVelocity += _box.angularAcceleration;
         }
+        frictionDirection = -tangent * Math.Sign(velAlongTangent);
+
             // TODO: Add your update logic here
 
             base.Update(gameTime);
@@ -280,7 +315,33 @@ else
           SpriteEffects.None,
             0f
             );
-        _spriteBatch.DrawString(_font, $"{_box.forceFromGravity:F2}N",new Vector2(_arrow[0].X,_arrow[0].Y),Color.White);
+        _spriteBatch.Draw(
+            _arrowTexture,
+            _box._centreOfBox,
+            null,
+            Color.Blue,
+            lineRotation+MathHelper.ToRadians(90f)*-Math.Sign(velAlongTangent),
+            new Vector2(_arrowTexture.Width/2, radius),
+            0.05f,
+            SpriteEffects.None,
+            0f
+        );
+        _spriteBatch.DrawString(_font, $"Angular Velocity: {_box.angularVelocity:F4}", new Vector2(0, 20), Color.Black);
+_spriteBatch.DrawString(_font, $"Torque: {_box.torque:F4}", new Vector2(0, 40), Color.Black);
+_spriteBatch.DrawString(_font, $"Angular Accel: {_box.angularAcceleration:F4}", new Vector2(0, 60), Color.Black);
+_spriteBatch.DrawString(_font, $"Normal Force: {_box.normalReactionForce:F4}", new Vector2(0, 80), Color.Black);
+_spriteBatch.DrawString(_font, $"Box Velocity: {_box.boxVelocity:F2}", new Vector2(0, 100), Color.Black);
+_spriteBatch.DrawString(_font, $"Rotation: {MathHelper.ToDegrees(_box.rotation):F2} deg", new Vector2(0, 120), Color.Black);
+_spriteBatch.DrawString(_font, $"Line Rotation: {MathHelper.ToDegrees(_line.Rotation):F2} deg", new Vector2(0, 140), Color.Black);
+_spriteBatch.DrawString(_font, $"Angle Diff: {MathHelper.ToDegrees(Math.Abs(_box.rotation - _line.Rotation)):F2} deg", new Vector2(0, 160), Color.Black);
+_spriteBatch.DrawString(_font, $"justCollided: {justCollided}", new Vector2(0, 180), Color.Black);
+_spriteBatch.DrawString(_font, $"affectOfGravity: {_box.affectOfGravity}", new Vector2(0, 200), Color.Black);
+_spriteBatch.DrawString(_font, $"forceDownSlope: {forceDownSlope:F4}", new Vector2(0, 220), Color.Black);
+_spriteBatch.DrawString(_font, $"maxFriction: {_box.maxForceFromFriction:F4}", new Vector2(0, 240), Color.Black);
+_spriteBatch.DrawString(_font, $"velAlongTangent: {velAlongTangent:F4}", new Vector2(0, 260), Color.Black);
+
+_spriteBatch.DrawString(_font, $"{_box.displayedForceFromGravity:F2}N",new Vector2(_arrow[0].X,_arrow[0].Y),Color.White);
+_spriteBatch.DrawString(_font, $"{displayedForceFromFriction:F2}N",new Vector2(_arrow[1].X, _arrow[1].Y),Color.White);
         _spriteBatch.End();
         base.Draw(gameTime);
 
