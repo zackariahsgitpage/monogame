@@ -18,9 +18,10 @@ public class BoxObject
     private Vector2 _mousePointAfterRelease;
     public float angularVelocity;
     public float momentOfInertia;
-    public float gravity;
+    private float gravity;
     public bool affectOfGravity;
     public float forceFromGravity;
+    private float gravityScale;
  
     public Vector2 boxVelocity;
     public float maxForceFromFriction;
@@ -31,25 +32,31 @@ public class BoxObject
     private bool isMoving;
     private float resolvedSpeed;
     public float normalReactionForce;
-    public float mass;
+    private float mass;
     public float boxScale { get; set; } = 1f;
     public float angularAcceleration;
     public float torque;
 
-
+    public float GetGravity() {return gravity;}
+    public void SetGravity(float inputGrav) {gravity = inputGrav;}
+    public float GetMass() {return mass;}
+    public void SetMass(float inputMass) {mass = inputMass;}
+        
+    
     public BoxObject(Texture2D texture, Vector2 initialPosition)
     {
         _texture = texture;
         _bounds = new Rectangle(0, 0, 100, 100);
         _centreOfBox = initialPosition;
-        gravity = 0.98f; // when gravity is 1, g=10m/s^2
+        gravity = 9.8f; // when gravity is 1, g=10m/s^2
+        gravityScale = 0.1f;
         mouseHeld = false;
         rotation = 0f;
         isMoving = false;
         resolvedSpeed = 0;
         normalReactionForce = 0f;
-        coefficientOfFriction = 0.5f;
-        mass = 10;
+        coefficientOfFriction = 0.1f;
+        mass = 1;
         torque = 0f;
         angularVelocity = 0f;
         boxVelocity = new Vector2(0,0);
@@ -59,6 +66,7 @@ public class BoxObject
 
     public void Update(GameWindow window)
     {
+        momentOfInertia = (mass*(_bounds.Width*_bounds.Width + _bounds.Height*_bounds.Height)/12);
         KeyboardState keyboard = Keyboard.GetState();
         MouseState mouse = Mouse.GetState();
         resolvedSpeed = boxVelocity.Length();
@@ -92,7 +100,7 @@ public class BoxObject
                 forceFromGravity = mass * (gravity);
                 if (affectOfGravity)
                 {
-                boxVelocity.Y += gravity ;
+                boxVelocity.Y += gravity*gravityScale ;
             }
             }
             if (boxVelocity.Y < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)

@@ -20,8 +20,9 @@ public class Game1 : Game
     Texture2D _blackTexture;
     LineObject _line;
     Texture2D _arrowTexture;
-    Rectangle _arrow;
+    Rectangle[] _arrow;
     float lineRotation;
+    private float setMassOfBox;
     Vector2 positionOfLine;
     Vector2[] axes;
      bool justCollided = true;
@@ -78,6 +79,10 @@ public class Game1 : Game
             return (true, mtv);
         }
     }
+    public void SaveFile()
+    {
+
+    }
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -94,8 +99,8 @@ public class Game1 : Game
         positionOfLine=new Vector2(200, 400);
         GuiRenderer = new ImGuiRenderer(this);
         _guiActive = true;
+        setMassOfBox = 1f;
         base.Initialize();  
-
     }
 
     protected override void LoadContent()
@@ -104,7 +109,11 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _blackTexture = Content.Load<Texture2D>("blacksquare");
         _arrowTexture = Content.Load<Texture2D>("redarrow");
-        _arrow = new Rectangle(0,0,50,100);
+        _arrow = new Rectangle[3];
+        for (int i = 0; i < 3; i++)
+        {
+        _arrow[i] = new Rectangle(0,0,50,100);
+        }
         _box = new BoxObject(_blackTexture, new Vector2(0, 0));
         _line = new LineObject(_blackTexture, new Vector2(200, 400), new Rectangle(0, 0, 400, 10), 0);
         _line.Origin = new Vector2(_line.SourceRect.Width / 2f, _line.SourceRect.Height / 2f);
@@ -112,11 +121,14 @@ public class Game1 : Game
 
         // TODO: use this.Content to load your game content here
     }
-
     protected override void Update(GameTime gameTime)
     {
-        _arrow.X = (int)_box._centreOfBox.X;
-        _arrow.Y = (int)_box._centreOfBox.Y + _box.GetHeight();  
+        _box.SetMass(setMassOfBox);
+        for (int i = 0; i < _arrow.Length; i++ )
+        {
+           _arrow[i].X = (int)_box._centreOfBox.X; 
+        }
+        _arrow[0].Y = (int)_box._centreOfBox.Y + _box.GetHeight();  
         KeyboardState keyboard = Keyboard.GetState();
         if (keyboard.IsKeyDown(Keys.M))
         {
@@ -167,16 +179,16 @@ public class Game1 : Game
             //_box.directionalVelocity*= -0.1f;
                 if (velAlongNormal < 0)
                 {
-                    _box.directionalVelocity -= normal * velAlongNormal;
+                    _box.boxVelocity -= normal * velAlongNormal;
                 }
-                _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
+                _box.normalReactionForce = (float)(_box.GetGravity() * _box.GetMass() * Math.Abs(Math.Cos(lineRotation)));
                  _box.maxForceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
-                 float forceDownSlope = (float)(_box.mass * _box.gravity * Math.Abs(Math.Sin(lineRotation)));
+                 float forceDownSlope = (float)(_box.GetMass() * _box.GetGravity() * Math.Abs(Math.Sin(lineRotation)));
                  float velAlongTangent = Vector2.Dot(_box.boxVelocity, tangent);
                  if (forceDownSlope <= _box.maxForceFromFriction && Math.Abs(velAlongTangent) < 0.01f)
                 {
                  // cancel all motion along surface
-                 _box.directionalVelocity -= tangent * velAlongTangent;
+                 _box.boxVelocity -= tangent * velAlongTangent;
                  _box.affectOfGravity = false; // Disable gravity when friction holds the box  
                 }           
 else
@@ -185,8 +197,8 @@ else
     if (!float.IsNaN(velAlongTangent))
     {
         float frictionForce = _box.maxForceFromFriction;
-        float frictionAcceleration = frictionForce / _box.mass;
-        _box.directionalVelocity -= tangent * Math.Sign(velAlongTangent) * frictionAcceleration;
+        float frictionAcceleration = frictionForce / _box.GetMass();
+        _box.boxVelocity -= tangent * Math.Sign(velAlongTangent) * frictionAcceleration;
     }
 }
            Vector2 contactPoint;
@@ -218,7 +230,7 @@ else
                 _box.torque = 0f;
             } 
             float angleDifference = Math.Abs(_box.rotation - lineRotation);
-            _box.angularAcceleration = _box.torque*2 / _box.momentOfInertia;
+            _box.angularAcceleration = _box.torque / _box.momentOfInertia;
             if (justCollided == false)
             {
                 if (angleDifference > MathHelper.ToRadians(3f))
@@ -236,12 +248,10 @@ else
             }
 else
 {
-           _box.angularVelocity += _box.angularAcceleration; // scale for 60fps 
+           _box.angularVelocity += _box.angularAcceleration; 
         } 
             
         }
-       //lse
-       //   {_box.gravityEffectOnBox = true;}
         else
         {
             _box.affectOfGravity = true; // Re-enable gravity when not colliding
@@ -257,11 +267,11 @@ else
         GraphicsDevice.Clear(Color.CornflowerBlue);
         _spriteBatch.Begin();
         _line.Draw(_spriteBatch);
-       _spriteBatch.DrawString(_font, $"Speed: {_box.directionalVelocity.Length():F2}", new Vector2(0,0),Color.Black);
+       _spriteBatch.DrawString(_font, $"Speed: {_box.boxVelocity.Length():F2}", new Vector2(0,0),Color.Black);
        _box.Draw(_spriteBatch);
        _spriteBatch.Draw(
          _arrowTexture,
-           new Vector2(_arrow.X, _arrow.Y),
+           new Vector2(_arrow[0].X, _arrow[0].Y),
            null, 
           Color.Red,
           MathHelper.ToRadians(180f),
@@ -270,6 +280,7 @@ else
           SpriteEffects.None,
             0f
             );
+        _spriteBatch.DrawString(_font, $"{_box.forceFromGravity:F2}N",new Vector2(_arrow[0].X,_arrow[0].Y),Color.White);
         _spriteBatch.End();
         base.Draw(gameTime);
 
@@ -284,7 +295,7 @@ else
            // if (ImGui.MenuItem("Save", "Ctrl+S")) { /* Do stuff */ }
            // if (ImGui.MenuItem("Close", "Ctrl+W")) { _guiActive = false; }
             ImGui.SliderFloat("Coefficient of friction", ref _box.coefficientOfFriction, 0.0f, 1.0f);
-            ImGui.SliderFloat("Mass", ref _box.mass, 0.0f, 100f);
+            ImGui.SliderFloat("Mass", ref setMassOfBox, 0.0f, 100f);
             ImGui.EndMenu();
         }
         ImGui.EndMenuBar();
