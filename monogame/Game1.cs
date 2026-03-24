@@ -22,6 +22,7 @@ public class Game1 : Game
     Texture2D _arrowTexture;
     Rectangle[] _arrow;
     float lineRotation;
+    private float setMassOfBox;
     Vector2 positionOfLine;
     Vector2[] axes;
      bool justCollided = true;
@@ -78,6 +79,10 @@ public class Game1 : Game
             return (true, mtv);
         }
     }
+    public void SaveFile()
+    {
+
+    }
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -94,6 +99,7 @@ public class Game1 : Game
         positionOfLine=new Vector2(200, 400);
         GuiRenderer = new ImGuiRenderer(this);
         _guiActive = true;
+        setMassOfBox = 1f;
         base.Initialize();  
     }
 
@@ -115,9 +121,9 @@ public class Game1 : Game
 
         // TODO: use this.Content to load your game content here
     }
-
     protected override void Update(GameTime gameTime)
     {
+        _box.SetMass(setMassOfBox);
         for (int i = 0; i < _arrow.Length; i++ )
         {
            _arrow[i].X = (int)_box._centreOfBox.X; 
@@ -175,9 +181,9 @@ public class Game1 : Game
                 {
                     _box.boxVelocity -= normal * velAlongNormal;
                 }
-                _box.normalReactionForce = (float)(_box.gravity * _box.mass * Math.Abs(Math.Cos(lineRotation)));
+                _box.normalReactionForce = (float)(_box.GetGravity() * _box.GetMass() * Math.Abs(Math.Cos(lineRotation)));
                  _box.maxForceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
-                 float forceDownSlope = (float)(_box.mass * _box.gravity * Math.Abs(Math.Sin(lineRotation)));
+                 float forceDownSlope = (float)(_box.GetMass() * _box.GetGravity() * Math.Abs(Math.Sin(lineRotation)));
                  float velAlongTangent = Vector2.Dot(_box.boxVelocity, tangent);
                  if (forceDownSlope <= _box.maxForceFromFriction && Math.Abs(velAlongTangent) < 0.01f)
                 {
@@ -191,7 +197,7 @@ else
     if (!float.IsNaN(velAlongTangent))
     {
         float frictionForce = _box.maxForceFromFriction;
-        float frictionAcceleration = frictionForce / _box.mass;
+        float frictionAcceleration = frictionForce / _box.GetMass();
         _box.boxVelocity -= tangent * Math.Sign(velAlongTangent) * frictionAcceleration;
     }
 }
@@ -224,7 +230,7 @@ else
                 _box.torque = 0f;
             } 
             float angleDifference = Math.Abs(_box.rotation - lineRotation);
-            _box.angularAcceleration = _box.torque*2 / _box.momentOfInertia;
+            _box.angularAcceleration = _box.torque / _box.momentOfInertia;
             if (justCollided == false)
             {
                 if (angleDifference > MathHelper.ToRadians(3f))
@@ -289,7 +295,7 @@ else
            // if (ImGui.MenuItem("Save", "Ctrl+S")) { /* Do stuff */ }
            // if (ImGui.MenuItem("Close", "Ctrl+W")) { _guiActive = false; }
             ImGui.SliderFloat("Coefficient of friction", ref _box.coefficientOfFriction, 0.0f, 1.0f);
-            ImGui.SliderFloat("Mass", ref _box.mass, 0.0f, 100f);
+            ImGui.SliderFloat("Mass", ref setMassOfBox, 0.0f, 100f);
             ImGui.EndMenu();
         }
         ImGui.EndMenuBar();
