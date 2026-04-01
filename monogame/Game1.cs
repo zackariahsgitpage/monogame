@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Metrics;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Xml;
+using System.Xml.XPath;
 using ImGuiNET;
+using Microsoft.VisualBasic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -39,7 +43,9 @@ public class Game1 : Game
     private Vector2 frictionDirection;
     private float radius = 2700f;
     private float displayedForceFromFriction;
-
+    protected List<BoxObject> listOfBoxes;
+    protected bool spawnKeyPressed;
+    protected float[,] coefficientsMatrix;
   public static class SATHelper
     {
         public static float[] ProjectOntoAxis(Vector2[] worldCorners, Vector2 axis)
@@ -110,16 +116,16 @@ public class Game1 : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-    }
-
+    }  
     protected override void Initialize()
     {
         // TODO: Add your initialization logic here
         positionOfLine=new Vector2(200, 400);
         GuiRenderer = new ImGuiRenderer(this);
         _guiActive = true;
-        setMassOfBox = 1f;
+        coefficientsMatrix = new float[4,4];
         north = new Vector2 (0,1);
+        spawnKeyPressed = false;
         base.Initialize();  
     }
 
@@ -134,15 +140,92 @@ public class Game1 : Game
         {
         _arrow[i] = new Rectangle(0,0,50,100);
         }
-        _box = new BoxObject(_blackTexture, new Vector2(0, 0));
-        _line = new LineObject(_blackTexture, new Vector2(200, 400), new Rectangle(0, 0, 800, 10), 0);
-        _line.Origin = new Vector2(_line.SourceRect.Width / 2f, _line.SourceRect.Height / 2f);
+        coefficientsMatrix[0,0] = 0.5f;
+        coefficientsMatrix[0,1] = 0.3f;
+        coefficientsMatrix[0,2] = 0.02f;
+        coefficientsMatrix[0,3] = 0.44f;
+        coefficientsMatrix[1,0] = 0.3f;
+        coefficientsMatrix[1,1] = 0.15f;
+        coefficientsMatrix[1,2] = 0.03f;
+        coefficientsMatrix[1,3] = 0.23f;
+        coefficientsMatrix[2,0] = 0.02f;
+        coefficientsMatrix[2,1] = 0.04f;
+        coefficientsMatrix[2,2] = 0.01f;
+        coefficientsMatrix[2,3] = 0.05f;
+        coefficientsMatrix[3,0] = 0.44f;
+        coefficientsMatrix[3,1] = 0.23f;
+        coefficientsMatrix[3,2] = 0.06f;
+        coefficientsMatrix[3,3] = 0.42f;
+        listOfBoxes = new List<BoxObject>();
+       // _box = new BoxObject(_blackTexture, new Vector2(_graphics.PreferredBackBufferWidth/2, 0), new Rectangle(0, 0, 100, 100));
+        _line = new LineObject(_blackTexture, new Vector2(200, 400), 0, new Rectangle(0, 0, 800, 10));
+        _line.Origin = new Vector2(_line._bounds.Width / 2f, _line._bounds.Height / 2f);
         GuiRenderer.RebuildFontAtlas();
 
         // TODO: use this.Content to load your game content here
     }
+    public void SpawnBox(int inputInt)
+    {
+        switch (inputInt)
+        {
+            case 0: 
+            listOfBoxes.Add(new BoxObject.BrassBox(_blackTexture, new Vector2(_graphics.PreferredBackBufferWidth/2, 0),
+             new Rectangle(0, 0, 100, 100)));
+             break;
+            case 1:
+            listOfBoxes.Add(new BoxObject.CastIronBox(_blackTexture, new Vector2(_graphics.PreferredBackBufferWidth/2, 0),
+             new Rectangle(0, 0, 100, 100)));
+             break;
+            case 2:
+            listOfBoxes.Add(new BoxObject.IceBox(_blackTexture, new Vector2(_graphics.PreferredBackBufferWidth/2, 0),
+             new Rectangle(0, 0, 100, 100)));
+             break;
+            case 3: 
+            listOfBoxes.Add(new BoxObject.SteelBox(_blackTexture, new Vector2(_graphics.PreferredBackBufferWidth/2, 0),
+             new Rectangle(0, 0, 100, 100)));
+             break;
+            case 4: 
+            listOfBoxes.Add(new BoxObject(_blackTexture, new Vector2(_graphics.PreferredBackBufferWidth/2, 0),
+             new Rectangle(0, 0, 100, 100)));
+             break;
+        }
+    }
     protected override void Update(GameTime gameTime)
     {
+        KeyboardState keyboardState = Keyboard.GetState();
+        if (!spawnKeyPressed && keyboardState.IsKeyDown(Keys.G))
+        {
+            SpawnBox(0);
+             spawnKeyPressed = true;
+        }
+        if (!spawnKeyPressed && keyboardState.IsKeyDown(Keys.H))
+        {
+            SpawnBox(1);
+             spawnKeyPressed = true;
+        }
+        if (!spawnKeyPressed && keyboardState.IsKeyDown(Keys.J))
+        {
+            SpawnBox(2);
+             spawnKeyPressed = true;
+        }
+        if (!spawnKeyPressed && keyboardState.IsKeyDown(Keys.K))
+        {
+            SpawnBox(3);
+             spawnKeyPressed = true;
+        }
+        if (!spawnKeyPressed && keyboardState.IsKeyDown(Keys.L))
+        {
+            SpawnBox(4);
+            spawnKeyPressed = true;
+        }
+        else if (keyboardState.IsKeyUp(Keys.G) && keyboardState.IsKeyUp(Keys.H) && keyboardState.IsKeyUp(Keys.J) && keyboardState.IsKeyUp(Keys.K) && keyboardState.IsKeyUp(Keys.L))
+        {spawnKeyPressed = false;}
+         if (keyboardState.IsKeyDown(Keys.M))
+        {_guiActive = true;}
+        lineRotation = _line._rotation;
+       _line.Update(Window);
+        foreach (BoxObject _box in listOfBoxes)
+        {
         if (_box.maxForceFromFriction > forceDownSlope)
         {
             displayedForceFromFriction = forceDownSlope * 10f;
@@ -151,30 +234,20 @@ public class Game1 : Game
         {
             displayedForceFromFriction = _box.maxForceFromFriction * 10f;
         }
-        
-        _box.SetMass(setMassOfBox);
         for (int i = 0; i < _arrow.Length; i++ )
         {
            _arrow[i].X = (int)_box._centreOfBox.X; 
         }
         _arrow[0].Y = (int)_box._centreOfBox.Y + _box.GetHeight();
         _arrow[1].Y = (int)_box._centreOfBox.Y - _box.GetHeight(); 
-        KeyboardState keyboard = Keyboard.GetState();
-        if (keyboard.IsKeyDown(Keys.M))
-        {
-            _guiActive = true;
-        }
-          lineRotation = _line.Rotation;
         axes = new Vector2[]
         {
-        
             new Vector2((float)Math.Cos(lineRotation), (float)Math.Sin(lineRotation)),
             new Vector2(-(float)Math.Sin(lineRotation), (float)Math.Cos(lineRotation)),
             new Vector2(1,0),
             new Vector2(0,1)
         };
         _box.Update(Window);
-        _line.Update(Window);
         axes[0] = new Vector2((float)Math.Cos(lineRotation), (float)Math.Sin(lineRotation));   
         axes[1] = new Vector2(-(float)Math.Sin(lineRotation), (float)Math.Cos(lineRotation));  
         axes[2] = new Vector2(1, 0);  
@@ -187,7 +260,7 @@ public class Game1 : Game
         if (result.IsColliding)
         {
             Vector2 mtv = result.MTV;
-             if (Vector2.Dot(mtv, _box._centreOfBox - _line.Position) < 0)
+             if (Vector2.Dot(mtv, _box._centreOfBox - _line._position) < 0)
             {
                 mtv = -mtv;
             }
@@ -210,8 +283,8 @@ public class Game1 : Game
                 {
                     _box.boxVelocity -= normal * velAlongNormal;
                 }
-                _box.normalReactionForce = (float)(_box.forceFromGravity * Math.Abs(Math.Cos(lineRotation)));
-                 _box.maxForceFromFriction = _box.normalReactionForce * _box.coefficientOfFriction;
+                _box.SetNormalReactionForce((float)(_box.forceFromGravity * Math.Abs(Math.Cos(lineRotation))));
+                 _box.maxForceFromFriction = _box.GetNormalReactionForce() * _box.coefficientOfFriction;
                  forceDownSlope = (float)(_box.forceFromGravity * Math.Abs(Math.Sin(lineRotation)));
                  velAlongTangent = Vector2.Dot(_box.boxVelocity, tangent);
 
@@ -252,7 +325,7 @@ else
       }
     }   
             }
-           Vector2 collisionForce = normal * _box.normalReactionForce;
+           Vector2 collisionForce = normal * _box.GetNormalReactionForce();
             Vector2 leverArm = contactPoint - _box._centreOfBox;
             _box.torque = leverArm.X * collisionForce.Y - leverArm.Y * collisionForce.X;
          
@@ -290,20 +363,23 @@ else
           _box.angularVelocity += _box.angularAcceleration;
         }
         frictionDirection = -tangent * Math.Sign(velAlongTangent);
-
+        }
+        
             // TODO: Add your update logic here
-
             base.Update(gameTime);
         
     }
+    
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
         _spriteBatch.Begin();
         _line.Draw(_spriteBatch);
-       _spriteBatch.DrawString(_font, $"Speed: {_box.boxVelocity.Length():F2}", new Vector2(0,0),Color.Black);
-       _box.Draw(_spriteBatch);
+    //    _spriteBatch.DrawString(_font, $"Speed: {_box.boxVelocity.Length():F2}", new Vector2(0,0),Color.Black);
+        foreach (BoxObject _box in listOfBoxes)
+        {
+        _box.Draw(_spriteBatch);
        _spriteBatch.Draw(
          _arrowTexture,
            new Vector2(_arrow[0].X, _arrow[0].Y),
@@ -314,7 +390,7 @@ else
              0.05f,
           SpriteEffects.None,
             0f
-            );
+            );  
         _spriteBatch.Draw(
             _arrowTexture,
             _box._centreOfBox,
@@ -326,22 +402,22 @@ else
             SpriteEffects.None,
             0f
         );
-        _spriteBatch.DrawString(_font, $"Angular Velocity: {_box.angularVelocity:F4}", new Vector2(0, 20), Color.Black);
-_spriteBatch.DrawString(_font, $"Torque: {_box.torque:F4}", new Vector2(0, 40), Color.Black);
-_spriteBatch.DrawString(_font, $"Angular Accel: {_box.angularAcceleration:F4}", new Vector2(0, 60), Color.Black);
-_spriteBatch.DrawString(_font, $"Normal Force: {_box.normalReactionForce:F4}", new Vector2(0, 80), Color.Black);
-_spriteBatch.DrawString(_font, $"Box Velocity: {_box.boxVelocity:F2}", new Vector2(0, 100), Color.Black);
-_spriteBatch.DrawString(_font, $"Rotation: {MathHelper.ToDegrees(_box.rotation):F2} deg", new Vector2(0, 120), Color.Black);
-_spriteBatch.DrawString(_font, $"Line Rotation: {MathHelper.ToDegrees(_line.Rotation):F2} deg", new Vector2(0, 140), Color.Black);
-_spriteBatch.DrawString(_font, $"Angle Diff: {MathHelper.ToDegrees(Math.Abs(_box.rotation - _line.Rotation)):F2} deg", new Vector2(0, 160), Color.Black);
-_spriteBatch.DrawString(_font, $"justCollided: {justCollided}", new Vector2(0, 180), Color.Black);
-_spriteBatch.DrawString(_font, $"affectOfGravity: {_box.affectOfGravity}", new Vector2(0, 200), Color.Black);
-_spriteBatch.DrawString(_font, $"forceDownSlope: {forceDownSlope:F4}", new Vector2(0, 220), Color.Black);
-_spriteBatch.DrawString(_font, $"maxFriction: {_box.maxForceFromFriction:F4}", new Vector2(0, 240), Color.Black);
-_spriteBatch.DrawString(_font, $"velAlongTangent: {velAlongTangent:F4}", new Vector2(0, 260), Color.Black);
-
-_spriteBatch.DrawString(_font, $"{_box.displayedForceFromGravity:F2}N",new Vector2(_arrow[0].X,_arrow[0].Y),Color.White);
-_spriteBatch.DrawString(_font, $"{displayedForceFromFriction:F2}N",new Vector2(_arrow[1].X, _arrow[1].Y),Color.White);
+         _spriteBatch.DrawString(_font, $"{_box.displayedForceFromGravity:F2}N",new Vector2(_arrow[0].X,_arrow[0].Y),Color.White);
+         _spriteBatch.DrawString(_font, $"{displayedForceFromFriction:F2}N",new Vector2(_arrow[1].X, _arrow[1].Y),Color.White);
+        }
+      //  _spriteBatch.DrawString(_font, $"Angular Velocity: {_box.angularVelocity:F4}", new Vector2(0, 20), Color.Black);
+//_spriteBatch.DrawString(_font, $"Torque: {_box.torque:F4}", new Vector2(0, 40), Color.Black);
+//_spriteBatch.DrawString(_font, $"Angular Accel: {_box.angularAcceleration:F4}", new Vector2(0, 60), Color.Black);
+// _spriteBatch.DrawString(_font, $"Normal Force: {_box.GetNormalReactionForce():F4}", new Vector2(0, 80), Color.Black);
+// _spriteBatch.DrawString(_font, $"Box Velocity: {_box.boxVelocity:F2}", new Vector2(0, 100), Color.Black);
+// _spriteBatch.DrawString(_font, $"Rotation: {MathHelper.ToDegrees(_box.rotation):F2} deg", new Vector2(0, 120), Color.Black);
+// _spriteBatch.DrawString(_font, $"Line Rotation: {MathHelper.ToDegrees(_line._rotation):F2} deg", new Vector2(0, 140), Color.Black);
+// _spriteBatch.DrawString(_font, $"Angle Diff: {MathHelper.ToDegrees(Math.Abs(_box.rotation - _line._rotation)):F2} deg", new Vector2(0, 160), Color.Black);
+// _spriteBatch.DrawString(_font, $"justCollided: {justCollided}", new Vector2(0, 180), Color.Black);
+// _spriteBatch.DrawString(_font, $"affectOfGravity: {_box.affectOfGravity}", new Vector2(0, 200), Color.Black);
+// _spriteBatch.DrawString(_font, $"forceDownSlope: {forceDownSlope:F4}", new Vector2(0, 220), Color.Black);
+// _spriteBatch.DrawString(_font, $"maxFriction: {_box.maxForceFromFriction:F4}", new Vector2(0, 240), Color.Black);
+// _spriteBatch.DrawString(_font, $"velAlongTangent: {velAlongTangent:F4}", new Vector2(0, 260), Color.Black);
         _spriteBatch.End();
         base.Draw(gameTime);
 
@@ -350,13 +426,20 @@ _spriteBatch.DrawString(_font, $"{displayedForceFromFriction:F2}N",new Vector2(_
 {
     if (ImGui.BeginMainMenuBar())
     {
-        if (ImGui.BeginMenu("Box properties"))
+        if (ImGui.BeginMenu("Boxes"))
         {
            // if (ImGui.MenuItem("Open..", "Ctrl+O")) { /* Do stuff */ }
            // if (ImGui.MenuItem("Save", "Ctrl+S")) { /* Do stuff */ }
            // if (ImGui.MenuItem("Close", "Ctrl+W")) { _guiActive = false; }
-            ImGui.SliderFloat("Coefficient of friction", ref _box.coefficientOfFriction, 0.0f, 1.0f);
-            ImGui.SliderFloat("Mass", ref setMassOfBox, 0.0f, 100f);
+           foreach (BoxObject _box in listOfBoxes)
+           {
+            if (ImGui.BeginMenu($"Box {listOfBoxes.IndexOf(_box)+1}"))
+                    {
+                        ImGui.SliderFloat("Mass", ref _box.mass, 0.0f, 100f);
+                        ImGui.SliderFloat("Coefficient of friction", ref _box.coefficientOfFriction, 0.0f, 1.0f);               
+                        ImGui.EndMenu();
+                    }
+           }
             ImGui.EndMenu();
         }
         ImGui.EndMenuBar();

@@ -11,46 +11,51 @@ using monogame;
 public class BoxObject
 {
 
-    private Texture2D _texture;
-    private Rectangle _bounds;
+    protected Texture2D _texture;
+    protected Rectangle _bounds;
     public Vector2 _centreOfBox;
-    private Vector2 _mousePointBeforeRelease;
-    private Vector2 _mousePointAfterRelease;
+    protected Vector2 _mousePointBeforeRelease;
+    protected Vector2 _mousePointAfterRelease;
     public float angularVelocity;
     public float momentOfInertia;
-    private float gravity;
+    protected float gravity;
     public bool affectOfGravity;
     public float forceFromGravity;
-    private float gravityScale;
+    protected float gravityScale;
  
     public Vector2 boxVelocity;
     public float maxForceFromFriction;
     public float coefficientOfFriction;
 
     public float rotation;
-    private bool mouseHeld;
-    private bool isMoving;
+    protected bool mouseHeld;
+    protected bool isMoving;
     private float resolvedSpeed;
-    public float normalReactionForce;
-    private float mass;
+    protected float normalReactionForce;
+    public float mass;
     public float boxScale { get; set; } = 1f;
     public float angularAcceleration;
     public float torque;
-    private float accelerationFromGravity;
+    protected float accelerationFromGravity;
     public float displayedForceFromGravity;
-    private bool boxHeld;
+    protected bool boxHeld;
+    protected Color colour;
 
 
     public float GetGravity() {return gravity;}
     public void SetGravity(float inputGrav) {gravity = inputGrav;}
     public float GetMass() {return mass;}
     public void SetMass(float inputMass) {mass = inputMass;}
+     public int GetWidth() {return _bounds.Width;}
+    public int GetHeight() {return _bounds.Height;}
+    public float GetNormalReactionForce() {return normalReactionForce;}
+    public void SetNormalReactionForce(float inputForce) {normalReactionForce = inputForce;}
         
     
-    public BoxObject(Texture2D texture, Vector2 initialPosition)
+    public BoxObject(Texture2D texture, Vector2 initialPosition, Rectangle sourceRectangle)
     {
         _texture = texture;
-        _bounds = new Rectangle(0, 0, 100, 100);
+        _bounds = sourceRectangle;
         _centreOfBox = initialPosition;
         gravity = 9.8f; // when gravity is 1, g=10m/s^2
         gravityScale = 0.1f;
@@ -67,6 +72,7 @@ public class BoxObject
         affectOfGravity = true;
         boxHeld = false;
         accelerationFromGravity = gravityScale * gravity;
+        colour = Color.Black;
     }
 
     public void Update(GameWindow window)
@@ -181,16 +187,54 @@ public class BoxObject
         }
         
     }
-    public int GetWidth()
+    public class BrassBox : BoxObject
     {
-        return _bounds.Width;
+        public BrassBox(Texture2D texture, Vector2 centreOfBox, Rectangle sourceRectangle) 
+        : base(texture, centreOfBox, sourceRectangle)
+        {
+            colour = Color.Gold;
+        }
+        public int GetIndexOfMaterialInMatrix()
+        {
+            return 0;
+        }
     }
-    public int GetHeight()
+    public class CastIronBox : BoxObject
     {
-        return _bounds.Height;
+        public CastIronBox(Texture2D texture, Vector2 centreOfBox, Rectangle sourceRectangle) 
+        : base(texture, centreOfBox, sourceRectangle)
+        {
+            colour = Color.Gray;
+        }
+        public int GetIndexOfMaterialInMatrix()
+        {
+            return 1;
+        }
     }
-
-
+    public class IceBox : BoxObject
+    {
+        public IceBox(Texture2D texture, Vector2 centreOfBox, Rectangle sourceRectangle) 
+        : base(texture, centreOfBox, sourceRectangle)
+        {
+            colour = Color.LightBlue;
+        }
+        public int GetIndexOfMaterialInMatrix()
+        {
+            return 2;
+        }
+    }
+    public class SteelBox : BoxObject
+    {
+        public SteelBox(Texture2D texture, Vector2 centreOfBox, Rectangle sourceRectangle) 
+        : base(texture, centreOfBox, sourceRectangle)
+        {
+            colour = Color.LightGray;
+        }
+        public int GetIndexOfMaterialInMatrix()
+        {
+            return 3;
+        }
+    }
 
     public void Draw(SpriteBatch spriteBatch)
     {
@@ -198,7 +242,7 @@ public class BoxObject
             _texture,
             _centreOfBox,
             _bounds,
-            Color.Black,
+            colour,
             rotation,
             new Vector2(_bounds.Width / 2, _bounds.Height / 2),
             1.0f,

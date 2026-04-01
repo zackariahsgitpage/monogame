@@ -10,48 +10,48 @@ using monogame;
 namespace monogame;
 public class LineObject
 {
-    public Texture2D Texture { get; private set; }
-    public Vector2 Position;
-    public Rectangle SourceRect { get; private set; }
-    public float Rotation {get; set;} = 0f;
+    public Texture2D _texture;
+    public Vector2 _position;
+    public Rectangle _bounds { get; private set; }
+    public float _rotation {get; set;} = 0f;
     public Vector2 Origin { get; set; } = Vector2.Zero;
     public float Scale { get; set; } = 1f;
-    public Color Color { get; set; } = Color.Black;
+    protected Color _colour;
 
-    public LineObject(Texture2D texture, Vector2 position, Rectangle sourceRect, float rotation)
+    public LineObject(Texture2D texture, Vector2 position, float rotation, Rectangle sourceRectangle)
     {
-        Texture = texture;
-        Position = position;
-        SourceRect = sourceRect;
-        Rotation = -MathHelper.ToRadians(rotation);
-
+        _texture = texture;
+        _position = position;
+        _bounds = sourceRectangle;
+        _rotation = -MathHelper.ToRadians(rotation);
+        _colour = Color.Black;
     }
   public void Update(GameWindow window)
     {
-         KeyboardState keyboard = Keyboard.GetState();
-         if (keyboard.IsKeyDown(Keys.O))
+         KeyboardState keyboardState = Keyboard.GetState();
+         if (keyboardState.IsKeyDown(Keys.O))
         {
-            Rotation +=MathHelper.ToRadians(1f);
+            _rotation +=MathHelper.ToRadians(1f);
         }
-         if (keyboard.IsKeyDown(Keys.I))
+         if (keyboardState.IsKeyDown(Keys.I))
         {
-            Rotation -=MathHelper.ToRadians(1f);
+            _rotation -=MathHelper.ToRadians(1f);
         }
-         if (keyboard.IsKeyDown(Keys.Right))
+         if (keyboardState.IsKeyDown(Keys.Right))
         {
-         Position.X+=10;
+         _position.X+=10;
         }
-        if (keyboard.IsKeyDown(Keys.Left))
+        if (keyboardState.IsKeyDown(Keys.Left))
         {
-         Position.X-=10;
+         _position.X-=10;
         }
-        if (keyboard.IsKeyDown(Keys.Up))
+        if (keyboardState.IsKeyDown(Keys.Up))
         {
-         Position.Y-=10;
+         _position.Y-=10;
         }
-        if (keyboard.IsKeyDown(Keys.Down))
+        if (keyboardState.IsKeyDown(Keys.Down))
         {
-         Position.Y+=10;
+         _position.Y+=10;
         }
     }
 
@@ -60,11 +60,11 @@ public class LineObject
     {
         get
         {
-              float halfWidth = SourceRect.Width * Scale / 2f;
-              float halfHeight = SourceRect.Height * Scale / 2f;
+              float halfWidth = _bounds.Width * Scale / 2f;
+              float halfHeight = _bounds.Height * Scale / 2f;
             return new Rectangle(
-                (int)Position.X,
-                (int)Position.Y,
+                (int)_position.X,
+                (int)_position.Y,
                 (int)(halfWidth * Scale),
                 (int)(halfHeight * Scale)
             );
@@ -73,10 +73,10 @@ public class LineObject
 
     public Vector2[] GetCorners()
     {
-        float halfWidth = SourceRect.Width * Scale / 2f;
-        float halfHeight = SourceRect.Height * Scale / 2f;
-        float cos = (float)Math.Cos(Rotation);
-        float sin = (float)Math.Sin(Rotation);
+        float halfWidth = _bounds.Width * Scale / 2f;
+        float halfHeight = _bounds.Height * Scale / 2f;
+        float cos = (float)Math.Cos(_rotation);
+        float sin = (float)Math.Sin(_rotation);
 
         // Local corners relative to origin (center)
         Vector2[] localCorners = new Vector2[]
@@ -87,7 +87,7 @@ public class LineObject
             new Vector2(-halfWidth, halfHeight)
         };
 
-        Vector2 centre = Position;
+        Vector2 centre = _position;
         Vector2[] worldCorners = new Vector2[4];
         for (int i = 0; i < 4; i++)
         {
@@ -101,6 +101,54 @@ public class LineObject
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(Texture, Position, SourceRect, Color, Rotation, Origin, Scale, SpriteEffects.None, 0f);
+        spriteBatch.Draw(_texture, _position, _bounds, _colour, _rotation, Origin, Scale, SpriteEffects.None, 0f);
     }
 }
+ public class BrassLine : LineObject
+    {
+        public BrassLine(Texture2D texture, Vector2 position, float rotation, Rectangle sourceRectangle) 
+        : base(texture, position, rotation, sourceRectangle)
+        {
+            _colour = Color.Gold;
+        }
+        public int GetIndexOfMaterialInMatrix()
+        {
+            return 0;
+        }
+    }
+    public class CastIronLine : LineObject
+    {
+        public CastIronLine(Texture2D texture, Vector2 position, float rotation, Rectangle sourceRectangle) 
+        : base(texture, position, rotation, sourceRectangle)
+        {
+            _colour = Color.DarkGray;
+        }
+        public int GetIndexOfMaterialInMatrix()
+        {
+            return 1;
+        }
+    }
+    public class IceLine : LineObject
+    {
+        public IceLine(Texture2D texture, Vector2 position, float rotation, Rectangle sourceRectangle) 
+        : base(texture, position, rotation, sourceRectangle)
+        {
+            _colour = Color.LightBlue;
+        }
+        public int GetIndexOfMaterialInMatrix()
+        {
+            return 2;
+        }
+    }
+    public class SteelLine : LineObject
+    {
+        public SteelLine(Texture2D texture, Vector2 position, float rotation, Rectangle sourceRectangle) 
+        : base(texture, position, rotation, sourceRectangle)
+        {
+            _colour = Color.Gray;
+        }
+        public int GetIndexOfMaterialInMatrix()
+        {
+            return 3;
+        }
+    }
