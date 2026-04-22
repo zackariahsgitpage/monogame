@@ -22,7 +22,7 @@ public class Game1 : Game
 {
     //screen is 760x420
     const float speedDisplayScale = 0.25f;
-    const float displayedForcesScale = 1/0.075f;
+    const float displayedForcesScale = 1 / 0.075f;
     const int radius = 2700;
     protected GraphicsDeviceManager _graphics;
     protected SpriteBatch _spriteBatch;
@@ -32,20 +32,22 @@ public class Game1 : Game
     protected Texture2D arrowTexture;
     protected Rectangle[] arrow;
     private float lineRotation;
-   // protected Vector2[] axes;
+    // protected Vector2[] axes;
     //protected bool justCollided = true;
     protected SpriteFont _font;
     protected bool _guiActive;
     //protected float forceDownSlope;
-   // protected float displayedForceFromFriction;
-   // float frictionForce;
+    // protected float displayedForceFromFriction;
+    // float frictionForce;
     protected List<BoxObject> listOfBoxes;
     protected bool keyPressed;
     protected float[,] coefficientsMatrix;
     protected List<BoxObject> boxesToRemove;
     protected bool isPaused;
     protected bool spacePressed;
-    
+    protected bool timerActive;
+    protected float messageTimer;
+
     public static class SATHelper
     {
         public static float[] ProjectOntoAxis(Vector2[] worldCorners, Vector2 axis)
@@ -105,31 +107,31 @@ public class Game1 : Game
     }
 
     public class SaveData
-{
-    public List<BoxSave> Boxes { get; set; }
-    public LineSave Line { get; set; }
-}
+    {
+        public List<BoxSave> Boxes { get; set; }
+        public LineSave Line { get; set; }
+    }
 
-public class BoxSave
-{
-    public float CentreOfBoxX { get; set; }
-    public float CentreOfBoxY { get; set; }
-    public float Rotation { get; set; }
-    public float Mass { get; set; }
-    public float CoefficientOfFriction { get; set; }
-    public bool CustomCoefficientToggle { get; set; }
-    public float VelocityX { get; set; }
-    public float VelocityY { get; set; }
-    public int MaterialIndex { get; set; }
-}
+    public class BoxSave
+    {
+        public float CentreOfBoxX { get; set; }
+        public float CentreOfBoxY { get; set; }
+        public float Rotation { get; set; }
+        public float Mass { get; set; }
+        public float CoefficientOfFriction { get; set; }
+        public bool CustomCoefficientToggle { get; set; }
+        public float VelocityX { get; set; }
+        public float VelocityY { get; set; }
+        public int MaterialIndex { get; set; }
+    }
 
-public class LineSave
-{
-    public float PositionX { get; set; }
-    public float PositionY { get; set; }
-    public float Rotation { get; set; }
-    public int MaterialIndex { get; set; }
-}
+    public class LineSave
+    {
+        public float PositionX { get; set; }
+        public float PositionY { get; set; }
+        public float Rotation { get; set; }
+        public int MaterialIndex { get; set; }
+    }
     public void SaveConfig(List<BoxObject> boxes, LineObject line, int fileNumber)
     {
         var saveData = new SaveData
@@ -172,23 +174,23 @@ public class LineSave
             {
                 foreach (var boxSave in saveData.Boxes)
                 {
-                BoxObject _box = boxSave.MaterialIndex switch
-                {
-                    0 => new BrassBox(blackTexture, new Vector2(boxSave.CentreOfBoxX, boxSave.CentreOfBoxY), new Rectangle(0, 0, 100, 100)),
-                    1 => new CastIronBox(blackTexture, new Vector2(boxSave.CentreOfBoxX, boxSave.CentreOfBoxY), new Rectangle(0, 0, 100, 100)),
-                    2 => new IceBox(blackTexture, new Vector2(boxSave.CentreOfBoxX, boxSave.CentreOfBoxY), new Rectangle(0, 0, 100, 100)),
-                    3 => new SteelBox(blackTexture, new Vector2(boxSave.CentreOfBoxX, boxSave.CentreOfBoxY), new Rectangle(0, 0, 100, 100)),
-                    _ => new DefaultBox(blackTexture, new Vector2(boxSave.CentreOfBoxX, boxSave.CentreOfBoxY), new Rectangle(0, 0, 100, 100))
-                };
+                    BoxObject _box = boxSave.MaterialIndex switch
+                    {
+                        0 => new BrassBox(blackTexture, new Vector2(boxSave.CentreOfBoxX, boxSave.CentreOfBoxY), new Rectangle(0, 0, 100, 100)),
+                        1 => new CastIronBox(blackTexture, new Vector2(boxSave.CentreOfBoxX, boxSave.CentreOfBoxY), new Rectangle(0, 0, 100, 100)),
+                        2 => new IceBox(blackTexture, new Vector2(boxSave.CentreOfBoxX, boxSave.CentreOfBoxY), new Rectangle(0, 0, 100, 100)),
+                        3 => new SteelBox(blackTexture, new Vector2(boxSave.CentreOfBoxX, boxSave.CentreOfBoxY), new Rectangle(0, 0, 100, 100)),
+                        _ => new DefaultBox(blackTexture, new Vector2(boxSave.CentreOfBoxX, boxSave.CentreOfBoxY), new Rectangle(0, 0, 100, 100))
+                    };
 
-                _box.SetRotation(boxSave.Rotation);
-                _box.SetMass(boxSave.Mass);
-                _box.SetCoefficientOfFriction(boxSave.CoefficientOfFriction);
-                _box.SetCustomCoefficientToggle(boxSave.CustomCoefficientToggle);
-                _box.SetBoxVelocity(new Vector2(boxSave.VelocityX, boxSave.VelocityY));
+                    _box.SetRotation(boxSave.Rotation);
+                    _box.SetMass(boxSave.Mass);
+                    _box.SetCoefficientOfFriction(boxSave.CoefficientOfFriction);
+                    _box.SetCustomCoefficientToggle(boxSave.CustomCoefficientToggle);
+                    _box.SetBoxVelocity(new Vector2(boxSave.VelocityX, boxSave.VelocityY));
 
-                listOfBoxes.Add(_box);
-            }
+                    listOfBoxes.Add(_box);
+                }
             }
             _line = saveData.Line.MaterialIndex switch
             {
@@ -272,6 +274,7 @@ public class LineSave
         _line = new DefaultLine(blackTexture, new Vector2(200, 400), 0, new Rectangle(0, 0, 800, 10));
         _line.SetOrigin(new Vector2(_line.GetBounds().Width / 2f, _line.GetBounds().Height / 2f));
         guiRenderer.RebuildFontAtlas();
+        timerActive = false;
     }
     public void SpawnBox(int inputInt)
     {
@@ -355,14 +358,25 @@ public class LineSave
             SpawnBox(4);
             keyPressed = true;
         }
-        if (!keyPressed && keyboardState.IsKeyDown(Keys.D) && !File.Exists(AppDomain.CurrentDomain.BaseDirectory + $"\\saveData\\save{1}.json"))
+        if (!keyPressed && keyboardState.IsKeyDown(Keys.D))
         {
-            LoadConfig(1);
+            string path = AppDomain.CurrentDomain.BaseDirectory + "\\saveData\\save0.json";
+
+            if (File.Exists(path))
+            {
+                LoadConfig(0);
+            }
+            else
+            {
+                timerActive = true;
+                messageTimer = 3f;
+            }
+
             keyPressed = true;
         }
         if (!keyPressed && keyboardState.IsKeyDown(Keys.S))
         {
-            SaveConfig(listOfBoxes, _line, 1);
+            SaveConfig(listOfBoxes, _line, 0);
             keyPressed = true;
         }
         else if (keyboardState.IsKeyUp(Keys.G) && keyboardState.IsKeyUp(Keys.H) && keyboardState.IsKeyUp(Keys.J) && keyboardState.IsKeyUp(Keys.K) && keyboardState.IsKeyUp(Keys.L))
@@ -421,7 +435,7 @@ public class LineSave
                     }
                     _box.SetNormalReactionForce((float)(_box.GetForceFromGravity() * Math.Abs(Math.Cos(lineRotation))));
                     _box.SetMaxForceFromFriction(_box.GetNormalReactionForce() * _box.GetCoefficientOfFriction());
-                     _box.SetVelAlongTangent(Vector2.Dot(_box.GetBoxVelocity(), _box.GetTangent()));
+                    _box.SetVelAlongTangent(Vector2.Dot(_box.GetBoxVelocity(), _box.GetTangent()));
                     _box.ApplyFriction(lineRotation, displayedForcesScale);
                     Vector2 contactPoint;
                     if (flatOnSurface)
@@ -529,11 +543,22 @@ public class LineSave
                 SpriteEffects.None,
                 0f
             );
-            _spriteBatch.DrawString(_font, $"{listOfBoxes.IndexOf(_box)+1}", new Vector2((int)_box.GetCentreOfBox().X - (_box.GetWidth())/2 - 10, (int)_box.GetCentreOfBox().Y - _box.GetHeight()/2 - 20), Color.Black);
+            _spriteBatch.DrawString(_font, $"{listOfBoxes.IndexOf(_box) + 1}", new Vector2((int)_box.GetCentreOfBox().X - (_box.GetWidth()) / 2 - 10, (int)_box.GetCentreOfBox().Y - _box.GetHeight() / 2 - 20), Color.Black);
             _spriteBatch.DrawString(_font, $"{_box.GetDisplayedForceFromGravity():F2}N", new Vector2((int)_box.GetCentreOfBox().X + 10, (int)(_box.GetCentreOfBox().Y + _box.GetHeight())), Color.Red);
             _spriteBatch.DrawString(_font, $"{_box.GetDisplayedForceFromFriction():F2}N", new Vector2((int)_box.GetCentreOfBox().X - _box.GetWidth(), (int)_box.GetCentreOfBox().Y), Color.Blue);
             _spriteBatch.DrawString(_font, $"{_box.GetDisplayedNormalForce():F2}N", new Vector2((int)_box.GetCentreOfBox().X + 10, (int)_box.GetCentreOfBox().Y - _box.GetHeight()), Color.Green);
         }
+        if (timerActive)
+        {
+            messageTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            _spriteBatch.DrawString(_font, "No save file found in slot 1!",
+                new Vector2(10, 20), Color.Red);
+            if (messageTimer <= 0f)
+            {
+                timerActive = false;
+            }
+        }
+
         _spriteBatch.End();
         base.Draw(gameTime);
         guiRenderer.BeginLayout(gameTime);
@@ -548,13 +573,12 @@ public class LineSave
                         if (ImGui.BeginMenu($"Box {listOfBoxes.IndexOf(_box) + 1}"))
                         {
                             float massValue = _box.GetMass();
-                            ImGui.SliderFloat("Mass", ref massValue, 0.0f, 100f);
+                            ImGui.InputFloat("Mass", ref massValue, 1f, 10f, "%.2f");
                             _box.SetMass(massValue);
-                            
                             bool customToggle = _box.GetCustomCoefficientToggle();
                             ImGui.Checkbox("Unlock Coefficient of Friction", ref customToggle);
                             _box.SetCustomCoefficientToggle(customToggle);
-                            
+
                             ImGui.BeginDisabled(!_box.GetCustomCoefficientToggle());
                             float coeffValue = _box.GetCoefficientOfFriction();
                             ImGui.SliderFloat("Coefficient of friction", ref coeffValue, 0.0f, 1.0f);
@@ -635,8 +659,8 @@ public class LineSave
             ImGui.Begin("Box Stats");
             foreach (BoxObject _box in listOfBoxes)
             {
-                ImGui.Text($"Box {listOfBoxes.IndexOf(_box) + 1} Speed: {_box.GetBoxVelocity().Length()*speedDisplayScale:F2}");
-                ImGui.Text($"Box {listOfBoxes.IndexOf(_box) + 1} Force Down the slope: {_box.GetForceDownSlope()*displayedForcesScale:F2}");
+                ImGui.Text($"Box {listOfBoxes.IndexOf(_box) + 1} Speed: {_box.GetBoxVelocity().Length() * speedDisplayScale:F2}");
+                ImGui.Text($"Box {listOfBoxes.IndexOf(_box) + 1} Force Down the slope: {_box.GetForceDownSlope() * displayedForcesScale:F2}");
                 //ImGui.Text($"Box {listOfBoxes.IndexOf(_box) + 1} MaxForcefromfriction: {_box.GetMaxForceFromFriction():F2}");
             }
             ImGui.End();

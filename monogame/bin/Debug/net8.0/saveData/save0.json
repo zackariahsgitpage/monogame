@@ -1,8 +1,8 @@
 {
   "Boxes": [
     {
-      "CentreOfBoxX": 325.82742,
-      "CentreOfBoxY": 371.5655,
+      "CentreOfBoxX": 257,
+      "CentreOfBoxY": 164,
       "Rotation": 0.33069873,
       "Mass": 1,
       "CoefficientOfFriction": 0.432,
