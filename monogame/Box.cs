@@ -10,61 +10,100 @@ using monogame;
 
 public class BoxObject
 {
-
+    const float gravityScale = 0.075f;
+    const float boxScale = 1f;
+    const float displayedNormalForceScale = 10f;
     protected Texture2D _texture;
     protected Rectangle _bounds;
-    public Vector2 _centreOfBox;
+    protected Vector2 _centreOfBox;
     protected Vector2 _mousePointBeforeRelease;
     protected Vector2 _mousePointAfterRelease;
-    public float angularVelocity;
-    public float momentOfInertia;
+    protected float angularVelocity;
+    protected float momentOfInertia;
     protected float gravity;
-    public bool affectOfGravity;
-    public float forceFromGravity;
-    protected float gravityScale;
- 
-    public Vector2 boxVelocity;
-    public float maxForceFromFriction;
-    public float coefficientOfFriction;
+    protected bool affectOfGravity;
+    protected float forceFromGravity;
+    
+    protected Vector2 boxVelocity;
+    protected float maxForceFromFriction;
+    protected float coefficientOfFriction;
 
-    public float rotation;
+    protected float rotation;
     protected bool mouseHeld;
     protected bool isMoving;
     private float resolvedSpeed;
     protected float normalReactionForce;
-    public float mass;
-    public float boxScale { get; set; } = 1f;
-    public float angularAcceleration;
-    public float torque;
+    protected float mass;
+
+    protected float angularAcceleration;
+    protected float torque;
     protected float accelerationFromGravity;
-    public float displayedForceFromGravity;
+    protected float displayedForceFromGravity;
     protected bool boxHeld;
     protected Color colour;
-
-
-    public float GetGravity() {return gravity;}
-    public void SetGravity(float inputGrav) {gravity = inputGrav;}
+    protected bool customCoefficientToggle;
+    protected Vector2 tangent;
+    protected Vector2 normal;
+    protected float velAlongNormal;
+    protected float velAlongTangent;
+    protected bool contextWindowOpen;
+    protected float displayedForceFromFriction;
+    protected bool justCollided;
+    protected float forceDownSlope;
+    protected float forceFromFriction;
+    public bool GetJustCollided() {return justCollided;}
+    public void SetJustCollided(bool input) {justCollided = input;}
+    public float GetDisplayedForceFromFriction() {return displayedForceFromFriction;}
+    public float GetDisplayedNormalForce() {return normalReactionForce/gravityScale;}
+    public Vector2 GetCentreOfBox() {return _centreOfBox;}
+    public Vector2 GetBoxVelocity() {return boxVelocity;}
+    public void SetBoxVelocity(Vector2 inputVelocity) {boxVelocity = inputVelocity;}
+    public float GetRotation() {return rotation;}
+    public void SetRotation(float inputRotation) {rotation = inputRotation;}
+    public float GetAngularVelocity() {return angularVelocity;}
+    public void SetAngularVelocity(float inputAngularVelocity) {angularVelocity = inputAngularVelocity;}
     public float GetMass() {return mass;}
     public void SetMass(float inputMass) {mass = inputMass;}
      public int GetWidth() {return _bounds.Width;}
     public int GetHeight() {return _bounds.Height;}
     public float GetNormalReactionForce() {return normalReactionForce;}
     public void SetNormalReactionForce(float inputForce) {normalReactionForce = inputForce;}
-        
-    
+    public float GetCoefficientOfFriction() {return coefficientOfFriction;}
+    public void SetCoefficientOfFriction(float inputCoefficient) {coefficientOfFriction = inputCoefficient;}
+    public void SetNormal(Vector2 inputNormal) {normal = inputNormal;}
+    public Vector2 GetNormal() {return normal;}
+    public void SetTangent(Vector2 inputTangent) {tangent = inputTangent;}
+    public Vector2 GetTangent() {return tangent;}
+    public void SetVelAlongNormal(float inputVelAlongNormal) {velAlongNormal = inputVelAlongNormal;}
+    public float GetVelAlongNormal() {return velAlongNormal;}
+    public void SetVelAlongTangent(float inputVelAlongTangent) {velAlongTangent = inputVelAlongTangent;}
+    public float GetVelAlongTangent() {return velAlongTangent;}
+    public float GetMaxForceFromFriction() {return maxForceFromFriction;}
+    public void SetMaxForceFromFriction(float input) {maxForceFromFriction = input;}
+    public float GetForceFromGravity() {return forceFromGravity;}
+    public void SetForceFromGravity(float input) {forceFromGravity = input;}
+    public bool GetAffectOfGravity() {return affectOfGravity;}
+    public void SetAffectOfGravity(bool input) {affectOfGravity = input;}
+    public float GetAngularAcceleration() {return angularAcceleration;}
+    public void SetAngularAcceleration(float input) {angularAcceleration = input;}
+    public float GetTorque() {return torque;}
+    public void SetTorque(float input) {torque = input;}
+    public float GetMomentOfInertia() {return momentOfInertia;}
+    public bool GetCustomCoefficientToggle() {return customCoefficientToggle;}
+    public void SetCustomCoefficientToggle(bool input) {customCoefficientToggle = input;}
+    public float GetDisplayedForceFromGravity() {return displayedForceFromGravity;}
+    public float GetForceDownSlope() {return forceDownSlope;}
     public BoxObject(Texture2D texture, Vector2 initialPosition, Rectangle sourceRectangle)
     {
         _texture = texture;
         _bounds = sourceRectangle;
         _centreOfBox = initialPosition;
         gravity = 9.8f; // when gravity is 1, g=10m/s^2
-        gravityScale = 0.1f;
         mouseHeld = false;
         rotation = 0f;
         isMoving = false;
         resolvedSpeed = 0;
         normalReactionForce = 0f;
-        coefficientOfFriction = 0.5f;
         mass = 1f;
         torque = 0f;
         angularVelocity = 0f;
@@ -75,7 +114,7 @@ public class BoxObject
         colour = Color.Black;
     }
 
-    public void Update(GameWindow window)
+    public void Update(GameWindow window, bool isPaused = false)
     {
         boxHeld = false;
         displayedForceFromGravity = mass*gravity;
@@ -94,7 +133,7 @@ public class BoxObject
             _mousePointBeforeRelease.X = mouse.X;
             _mousePointBeforeRelease.Y = mouse.Y;
             mouseHeld = true;
-            rotation = 0f;
+            angularAcceleration = 0f;
             boxHeld = true;
         }
         if (mouse.LeftButton == ButtonState.Released && mouseHeld)
@@ -109,6 +148,8 @@ public class BoxObject
             affectOfGravity = true;
         }
 
+        if (!isPaused)
+        {
         if (_centreOfBox.Y + _bounds.Height / 2 < window.ClientBounds.Height && !mouseHeld)
         {
             {
@@ -144,7 +185,36 @@ public class BoxObject
         }
     angularVelocity *= 0.9f; 
     rotation-= angularVelocity;
+        }
     
+    }
+    public void ApplyFriction(float lineRotation, float displayedFrictionScale)
+    {
+        forceDownSlope = (float)(forceFromGravity * Math.Abs(Math.Sin(lineRotation)));
+                    if (forceDownSlope <= maxForceFromFriction && Math.Abs(velAlongTangent) < 0.5f
+                      && boxVelocity.Length() < 1f)
+                    {
+                        boxVelocity = new Vector2(0f, 0f);
+                        affectOfGravity = false; // Disable gravity when friction holds the box  
+                    }
+                    else
+                    {
+                        affectOfGravity = true; // Re-enable gravity when friction can't hold the box
+                        if (!float.IsNaN(velAlongTangent))
+                        {
+                            forceFromFriction = maxForceFromFriction;
+                            float frictionAcceleration = forceFromFriction / mass;
+                            boxVelocity = boxVelocity - tangent * Math.Sign(velAlongTangent) * frictionAcceleration;
+                        }
+                    }
+                     if (maxForceFromFriction > forceDownSlope)
+    {
+        displayedForceFromFriction = forceDownSlope * displayedFrictionScale;
+    }
+    else
+    {
+        displayedForceFromFriction = maxForceFromFriction * displayedFrictionScale;
+    }
     }
     public void Translate(Vector2 vectorToTranslateBy)
     {
@@ -187,56 +257,11 @@ public class BoxObject
         }
         
     }
-    public class BrassBox : BoxObject
-    {
-        public BrassBox(Texture2D texture, Vector2 centreOfBox, Rectangle sourceRectangle) 
-        : base(texture, centreOfBox, sourceRectangle)
+    public virtual int GetIndexOfMaterialInMatrix()
         {
-            colour = Color.Gold;
+            return -1;
         }
-        public int GetIndexOfMaterialInMatrix()
-        {
-            return 0;
-        }
-    }
-    public class CastIronBox : BoxObject
-    {
-        public CastIronBox(Texture2D texture, Vector2 centreOfBox, Rectangle sourceRectangle) 
-        : base(texture, centreOfBox, sourceRectangle)
-        {
-            colour = Color.Gray;
-        }
-        public int GetIndexOfMaterialInMatrix()
-        {
-            return 1;
-        }
-    }
-    public class IceBox : BoxObject
-    {
-        public IceBox(Texture2D texture, Vector2 centreOfBox, Rectangle sourceRectangle) 
-        : base(texture, centreOfBox, sourceRectangle)
-        {
-            colour = Color.LightBlue;
-        }
-        public int GetIndexOfMaterialInMatrix()
-        {
-            return 2;
-        }
-    }
-    public class SteelBox : BoxObject
-    {
-        public SteelBox(Texture2D texture, Vector2 centreOfBox, Rectangle sourceRectangle) 
-        : base(texture, centreOfBox, sourceRectangle)
-        {
-            colour = Color.LightGray;
-        }
-        public int GetIndexOfMaterialInMatrix()
-        {
-            return 3;
-        }
-    }
-
-    public void Draw(SpriteBatch spriteBatch)
+         public void Draw(SpriteBatch spriteBatch)
     {
         spriteBatch.Draw(
             _texture,
@@ -251,6 +276,68 @@ public class BoxObject
         );
     }
 }
+    public class BrassBox : BoxObject
+    {
+        public BrassBox(Texture2D texture, Vector2 centreOfBox, Rectangle sourceRectangle) 
+        : base(texture, centreOfBox, sourceRectangle)
+        {
+            colour = Color.Gold;
+        }
+        public override int GetIndexOfMaterialInMatrix()
+        {
+            return 0;
+        }
+    }
+    public class CastIronBox : BoxObject
+    {
+        public CastIronBox(Texture2D texture, Vector2 centreOfBox, Rectangle sourceRectangle) 
+        : base(texture, centreOfBox, sourceRectangle)
+        {
+            colour = Color.Gray;
+        }
+        public override int GetIndexOfMaterialInMatrix()
+        {
+            return 1;
+        }
+    }
+    public class IceBox : BoxObject
+    {
+        public IceBox(Texture2D texture, Vector2 centreOfBox, Rectangle sourceRectangle) 
+        : base(texture, centreOfBox, sourceRectangle)
+        {
+            colour = Color.LightBlue;
+        }
+        public override int GetIndexOfMaterialInMatrix()
+        {
+            return 2;
+        }
+    }
+    public class SteelBox : BoxObject
+    {
+        public SteelBox(Texture2D texture, Vector2 centreOfBox, Rectangle sourceRectangle) 
+        : base(texture, centreOfBox, sourceRectangle)
+        {
+            colour = Color.LightGray;
+        }
+        public override int GetIndexOfMaterialInMatrix()
+        {
+            return 3;
+        }
+    }
+    public class DefaultBox : BoxObject
+    {
+        public DefaultBox(Texture2D texture, Vector2 centreOfBox, Rectangle sourceRectangle) 
+        : base(texture, centreOfBox, sourceRectangle)
+        {
+            colour = Color.Black;
+        }
+        public override int GetIndexOfMaterialInMatrix()
+        {
+            return 4;
+        }
+    }
+
+
 
 
 

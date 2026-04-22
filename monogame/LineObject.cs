@@ -9,14 +9,21 @@ using monogame;
 
 namespace monogame;
 public class LineObject
-{
-    public Texture2D _texture;
-    public Vector2 _position;
-    public Rectangle _bounds { get; private set; }
-    public float _rotation {get; set;} = 0f;
-    public Vector2 Origin { get; set; } = Vector2.Zero;
-    public float Scale { get; set; } = 1f;
+{  
+    const float scale = 1f;
+    protected Texture2D _texture;
+    protected Vector2 _position;
+    protected Rectangle _bounds;
+    protected float _rotation= 0f;
+    protected Vector2 origin = Vector2.Zero;
     protected Color _colour;
+    public Vector2 GetPosition() {return _position;}
+    public Rectangle GetBounds() {return _bounds;}
+    public float GetRotation() {return _rotation;}
+    public void SetRotation(float inputRotation) {_rotation = inputRotation;}
+    public Vector2 GetOrigin() {return origin;}
+    public void SetOrigin(Vector2 inputOrigin) {origin = inputOrigin;}
+
 
     public LineObject(Texture2D texture, Vector2 position, float rotation, Rectangle sourceRectangle)
     {
@@ -60,21 +67,21 @@ public class LineObject
     {
         get
         {
-              float halfWidth = _bounds.Width * Scale / 2f;
-              float halfHeight = _bounds.Height * Scale / 2f;
+              float halfWidth = _bounds.Width * scale / 2f;
+              float halfHeight = _bounds.Height * scale / 2f;
             return new Rectangle(
                 (int)_position.X,
                 (int)_position.Y,
-                (int)(halfWidth * Scale),
-                (int)(halfHeight * Scale)
+                (int)(halfWidth * scale),
+                (int)(halfHeight * scale)
             );
         }
     }
 
     public Vector2[] GetCorners()
     {
-        float halfWidth = _bounds.Width * Scale / 2f;
-        float halfHeight = _bounds.Height * Scale / 2f;
+        float halfWidth = _bounds.Width * scale / 2f;
+        float halfHeight = _bounds.Height * scale / 2f;
         float cos = (float)Math.Cos(_rotation);
         float sin = (float)Math.Sin(_rotation);
 
@@ -101,9 +108,14 @@ public class LineObject
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(_texture, _position, _bounds, _colour, _rotation, Origin, Scale, SpriteEffects.None, 0f);
+        spriteBatch.Draw(_texture, _position, _bounds, _colour, _rotation, origin, scale, SpriteEffects.None, 0f);
     }
+     public virtual int GetIndexOfMaterialInMatrix()
+        {
+            return -1;
+        }
 }
+
  public class BrassLine : LineObject
     {
         public BrassLine(Texture2D texture, Vector2 position, float rotation, Rectangle sourceRectangle) 
@@ -111,7 +123,7 @@ public class LineObject
         {
             _colour = Color.Gold;
         }
-        public int GetIndexOfMaterialInMatrix()
+        public override int GetIndexOfMaterialInMatrix()
         {
             return 0;
         }
@@ -123,7 +135,7 @@ public class LineObject
         {
             _colour = Color.DarkGray;
         }
-        public int GetIndexOfMaterialInMatrix()
+        public override int GetIndexOfMaterialInMatrix()
         {
             return 1;
         }
@@ -135,7 +147,7 @@ public class LineObject
         {
             _colour = Color.LightBlue;
         }
-        public int GetIndexOfMaterialInMatrix()
+        public override int GetIndexOfMaterialInMatrix()
         {
             return 2;
         }
@@ -147,8 +159,20 @@ public class LineObject
         {
             _colour = Color.Gray;
         }
-        public int GetIndexOfMaterialInMatrix()
+        public override int GetIndexOfMaterialInMatrix()
         {
             return 3;
+        }
+    }
+    public class DefaultLine : LineObject
+    {
+        public DefaultLine(Texture2D texture, Vector2 position, float rotation, Rectangle sourceRectangle) 
+        : base(texture, position, rotation, sourceRectangle)
+        {
+            _colour = Color.Black;
+        }
+        public override int GetIndexOfMaterialInMatrix()
+        {
+            return 4;
         }
     }

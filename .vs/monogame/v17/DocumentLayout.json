@@ -1,12 +1,53 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\zacksgitpagerepo\\monogame\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{7CA08C04-0553-40ED-9C38-68A59C59BC76}|monogame\\monogame.csproj|c:\\zacksgitpagerepo\\monogame\\monogame\\classdiagram1.cd||{59B0B277-7DDF-4E36-A3ED-02DAC5B9E2FA}|",
+      "RelativeMoniker": "D:0:0:{7CA08C04-0553-40ED-9C38-68A59C59BC76}|monogame\\monogame.csproj|solutionrelative:monogame\\classdiagram1.cd||{59B0B277-7DDF-4E36-A3ED-02DAC5B9E2FA}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7CA08C04-0553-40ED-9C38-68A59C59BC76}|monogame\\monogame.csproj|c:\\zacksgitpagerepo\\monogame\\monogame\\box.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7CA08C04-0553-40ED-9C38-68A59C59BC76}|monogame\\monogame.csproj|solutionrelative:monogame\\box.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Box.cs",
+              "DocumentMoniker": "C:\\zacksgitpagerepo\\monogame\\monogame\\Box.cs",
+              "RelativeDocumentMoniker": "monogame\\Box.cs",
+              "ToolTip": "C:\\zacksgitpagerepo\\monogame\\monogame\\Box.cs",
+              "RelativeToolTip": "monogame\\Box.cs",
+              "ViewState": "AQIAABgBAAAAAAAAAAAYwDgBAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-19T14:07:33.186Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ClassDiagram1.cd",
+              "DocumentMoniker": "C:\\zacksgitpagerepo\\monogame\\monogame\\ClassDiagram1.cd",
+              "RelativeDocumentMoniker": "monogame\\ClassDiagram1.cd",
+              "ToolTip": "C:\\zacksgitpagerepo\\monogame\\monogame\\ClassDiagram1.cd",
+              "RelativeToolTip": "monogame\\ClassDiagram1.cd",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000463|",
+              "WhenOpened": "2026-04-19T14:05:46.532Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }
