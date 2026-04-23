@@ -1,0 +1,21 @@
+{
+  "Boxes": [
+    {
+      "CentreOfBoxX": 888.5001,
+      "CentreOfBoxY": 384.61267,
+      "Rotation": 0.3316126,
+      "Mass": 1,
+      "CoefficientOfFriction": 0.3,
+      "CustomCoefficientToggle": false,
+      "VelocityX": 5.6604133,
+      "VelocityY": 1.9490365,
+      "MaterialIndex": 1
+    }
+  ],
+  "Line": {
+    "PositionX": 590,
+    "PositionY": 340,
+    "Rotation": 0.3316126,
+    "MaterialIndex": 0
+  }
+}
