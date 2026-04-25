@@ -60,16 +60,16 @@ public class Game1 : Game
             }
             return new float[] { min, max };
         }
-        public static (bool IsColliding, Vector2 MTV) CollisionData(Vector2[] CornersA, Vector2[] CornersB, Vector2[] axes)
+        public static (bool IsColliding, Vector2 MTV) CollisionData(Vector2[] CornersA, Vector2[] CornersB, Vector2[] axesOfNormals)
         {
             float smallestOverlap = float.PositiveInfinity;
             Vector2 smallestAxis = Vector2.Zero;
-            foreach (var axis in axes)
+            foreach (var axis in axesOfNormals)
             {
                 float[] projectionA = ProjectOntoAxis(CornersA, axis);
                 float[] projectionB = ProjectOntoAxis(CornersB, axis);
 
-                if (projectionA[1] < projectionB[0] || projectionB[1] < projectionA[0])
+                if (projectionA[1] < projectionB[0] || projectionB[1] < projectionA[0]) // if max of A is less than min of B, definitely not colliding
                 {
                     return (false, Vector2.Zero);
                 }
@@ -532,7 +532,7 @@ public class Game1 : Game
             _spriteBatch.DrawString(_font, $"{listOfBoxes.IndexOf(_box) + 1}", new Vector2((int)_box.GetCentreOfBox().X - (_box.GetWidth()) / 2 - 10, (int)_box.GetCentreOfBox().Y - _box.GetHeight() / 2 - 20), Color.Black);
             _spriteBatch.DrawString(_font, $"{_box.GetDisplayedForceFromGravity():F2}N", new Vector2((int)_box.GetCentreOfBox().X + 10, (int)(_box.GetCentreOfBox().Y + _box.GetHeight())), Color.Red);
             _spriteBatch.DrawString(_font, $"{_box.GetDisplayedForceFromFriction():F2}N", new Vector2((int)_box.GetCentreOfBox().X - _box.GetWidth(), (int)_box.GetCentreOfBox().Y), Color.Blue);
-            _spriteBatch.DrawString(_font, $"{_box.GetDisplayedNormalForce():F2}N", new Vector2((int)_box.GetCentreOfBox().X + 10, (int)_box.GetCentreOfBox().Y - _box.GetHeight()), Color.Green);
+            _spriteBatch.DrawString(_font, $"{_box.GetDisplayedNormalForce():F2}N", new Vector2((int)_box.GetCentreOfBox().X - 10, (int)_box.GetCentreOfBox().Y - _box.GetHeight()+30), Color.Green);
         }
         if (timerActive)
         {

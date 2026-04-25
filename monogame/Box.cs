@@ -46,7 +46,6 @@ public class BoxObject
     protected Vector2 normal;
     protected float velAlongNormal;
     protected float velAlongTangent;
-    protected bool contextWindowOpen;
     protected float displayedForceFromFriction;
     protected bool justCollided;
     protected float forceDownSlope;
