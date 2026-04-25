@@ -20,9 +20,10 @@ namespace monogame;
 
 public class Game1 : Game
 {
-    //screen is 760x420
-    const float speedDisplayScale = 0.25f;
-    const float displayedForcesScale = 1 / 0.075f;
+    const int SCREEN_WIDTH = 1024;
+    const int SCREEN_HEIGHT = 800;
+    const float DISPLAYED_SPEED_SCALE = 0.25f;
+    const float DISPLAYED_FORCE_SCALE = 1 / 0.075f;
     const int radius = 2700;
     protected GraphicsDeviceManager _graphics;
     protected SpriteBatch _spriteBatch;
@@ -32,13 +33,9 @@ public class Game1 : Game
     protected Texture2D arrowTexture;
     protected Rectangle[] arrow;
     private float lineRotation;
-    // protected Vector2[] axes;
-    //protected bool justCollided = true;
+
     protected SpriteFont _font;
-    protected bool _guiActive;
-    //protected float forceDownSlope;
-    // protected float displayedForceFromFriction;
-    // float frictionForce;
+
     protected List<BoxObject> listOfBoxes;
     protected bool keyPressed;
     protected float[,] coefficientsMatrix;
@@ -96,16 +93,6 @@ public class Game1 : Game
             return (true, mtv);
         }
     }
-    public static float GetAngleBetweenVectors(Vector2 vector1, Vector2 vector2)
-    {
-        vector1.Normalize();
-        vector2.Normalize();
-        float dotProduct = Vector2.Dot(vector1, vector2);
-        dotProduct = MathHelper.Clamp(dotProduct, -1f, 1f);
-        float angleRadians = (float)Math.Acos(dotProduct);
-        return angleRadians;
-    }
-
     public class SaveData
     {
         public List<BoxSave> Boxes { get; set; }
@@ -225,7 +212,6 @@ public class Game1 : Game
     {
         // TODO: Add your initialization logic here
         guiRenderer = new ImGuiRenderer(this);
-        _guiActive = true;
         coefficientsMatrix = new float[5, 5];
         keyPressed = false;
         spacePressed = false;
@@ -436,7 +422,7 @@ public class Game1 : Game
                     _box.SetNormalReactionForce((float)(_box.GetForceFromGravity() * Math.Abs(Math.Cos(lineRotation))));
                     _box.SetMaxForceFromFriction(_box.GetNormalReactionForce() * _box.GetCoefficientOfFriction());
                     _box.SetVelAlongTangent(Vector2.Dot(_box.GetBoxVelocity(), _box.GetTangent()));
-                    _box.ApplyFriction(lineRotation, displayedForcesScale);
+                    _box.ApplyFriction(lineRotation, DISPLAYED_FORCE_SCALE);
                     Vector2 contactPoint;
                     if (flatOnSurface)
                     {
@@ -562,8 +548,6 @@ public class Game1 : Game
         _spriteBatch.End();
         base.Draw(gameTime);
         guiRenderer.BeginLayout(gameTime);
-        if (_guiActive)
-        {
             if (ImGui.BeginMainMenuBar())
             {
                 if (ImGui.BeginMenu("Boxes"))
@@ -659,12 +643,10 @@ public class Game1 : Game
             ImGui.Begin("Box Stats");
             foreach (BoxObject _box in listOfBoxes)
             {
-                ImGui.Text($"Box {listOfBoxes.IndexOf(_box) + 1} Speed: {_box.GetBoxVelocity().Length() * speedDisplayScale:F2}");
-                ImGui.Text($"Box {listOfBoxes.IndexOf(_box) + 1} Force Down the slope: {_box.GetForceDownSlope() * displayedForcesScale:F2}");
-                //ImGui.Text($"Box {listOfBoxes.IndexOf(_box) + 1} MaxForcefromfriction: {_box.GetMaxForceFromFriction():F2}");
+                ImGui.Text($"Box {listOfBoxes.IndexOf(_box) + 1} Speed: {_box.GetBoxVelocity().Length() * DISPLAYED_SPEED_SCALE:F2}");
+                ImGui.Text($"Box {listOfBoxes.IndexOf(_box) + 1} Force Down the slope: {_box.GetForceDownSlope() * DISPLAYED_FORCE_SCALE:F2}");
             }
             ImGui.End();
-        }
         guiRenderer.EndLayout();
     }
 }

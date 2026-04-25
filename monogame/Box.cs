@@ -10,14 +10,14 @@ using monogame;
 
 public class BoxObject
 {
-    const float gravityScale = 0.075f;
-    const float boxScale = 1f;
+    const float GRAVITY_SCALE = 0.075f;
+    const float BOX_SCALE = 1f;
     const float displayedNormalForceScale = 10f;
-    protected Texture2D _texture;
-    protected Rectangle _bounds;
-    protected Vector2 _centreOfBox;
-    protected Vector2 _mousePointBeforeRelease;
-    protected Vector2 _mousePointAfterRelease;
+    protected Texture2D texture;
+    protected Rectangle bounds;
+    protected Vector2 centreOfBox;
+    protected Vector2 mousePointBeforeRelease;
+    protected Vector2 mousePointAfterRelease;
     protected float angularVelocity;
     protected float momentOfInertia;
     protected float gravity;
@@ -54,8 +54,8 @@ public class BoxObject
     public bool GetJustCollided() {return justCollided;}
     public void SetJustCollided(bool input) {justCollided = input;}
     public float GetDisplayedForceFromFriction() {return displayedForceFromFriction;}
-    public float GetDisplayedNormalForce() {return normalReactionForce/gravityScale;}
-    public Vector2 GetCentreOfBox() {return _centreOfBox;}
+    public float GetDisplayedNormalForce() {return normalReactionForce/GRAVITY_SCALE;}
+    public Vector2 GetCentreOfBox() {return centreOfBox;}
     public Vector2 GetBoxVelocity() {return boxVelocity;}
     public void SetBoxVelocity(Vector2 inputVelocity) {boxVelocity = inputVelocity;}
     public float GetRotation() {return rotation;}
@@ -64,8 +64,8 @@ public class BoxObject
     public void SetAngularVelocity(float inputAngularVelocity) {angularVelocity = inputAngularVelocity;}
     public float GetMass() {return mass;}
     public void SetMass(float inputMass) {mass = inputMass;}
-     public int GetWidth() {return _bounds.Width;}
-    public int GetHeight() {return _bounds.Height;}
+     public int GetWidth() {return bounds.Width;}
+    public int GetHeight() {return bounds.Height;}
     public float GetNormalReactionForce() {return normalReactionForce;}
     public void SetNormalReactionForce(float inputForce) {normalReactionForce = inputForce;}
     public float GetCoefficientOfFriction() {return coefficientOfFriction;}
@@ -95,10 +95,10 @@ public class BoxObject
     public float GetForceDownSlope() {return forceDownSlope;}
     public BoxObject(Texture2D texture, Vector2 initialPosition, Rectangle sourceRectangle)
     {
-        _texture = texture;
-        _bounds = sourceRectangle;
-        _centreOfBox = initialPosition;
-        gravity = 9.8f; // when gravity is 1, g=10m/s^2
+        this.texture = texture;
+        bounds = sourceRectangle;
+        centreOfBox = initialPosition;
+        gravity = 9.8f;
         mouseHeld = false;
         rotation = 0f;
         isMoving = false;
@@ -110,7 +110,7 @@ public class BoxObject
         boxVelocity = new Vector2(0,0);
         affectOfGravity = true;
         boxHeld = false;
-        accelerationFromGravity = gravityScale * gravity;
+        accelerationFromGravity = GRAVITY_SCALE * gravity;
         colour = Color.Black;
     }
 
@@ -118,29 +118,29 @@ public class BoxObject
     {
         boxHeld = false;
         displayedForceFromGravity = mass*gravity;
-        momentOfInertia = mass*(_bounds.Width*_bounds.Width + _bounds.Height*_bounds.Height)/12;
+        momentOfInertia = mass*(bounds.Width*bounds.Width + bounds.Height*bounds.Height)/12;
         KeyboardState keyboard = Keyboard.GetState();
         MouseState mouse = Mouse.GetState();
         resolvedSpeed = boxVelocity.Length();
-        _centreOfBox = new Vector2(_centreOfBox.X, _centreOfBox.Y);
+        centreOfBox = new Vector2(centreOfBox.X, centreOfBox.Y);
         if (boxVelocity.Y> 0 || boxVelocity.X > 0 || boxVelocity.Length() > 0)
         { isMoving = true; }
         else
         { isMoving = false; }
         if (mouse.LeftButton == ButtonState.Pressed && (BoundingBox.Contains(mouse.Position) || mouseHeld) )
         {
-            _centreOfBox = mouse.Position.ToVector2();
-            _mousePointBeforeRelease.X = mouse.X;
-            _mousePointBeforeRelease.Y = mouse.Y;
+            centreOfBox = mouse.Position.ToVector2();
+            mousePointBeforeRelease.X = mouse.X;
+            mousePointBeforeRelease.Y = mouse.Y;
             mouseHeld = true;
             angularAcceleration = 0f;
             boxHeld = true;
         }
         if (mouse.LeftButton == ButtonState.Released && mouseHeld)
         {
-            _mousePointAfterRelease.X = mouse.X;
-            _mousePointAfterRelease.Y = mouse.Y;
-            boxVelocity+= new Vector2((_mousePointAfterRelease.X - _mousePointBeforeRelease.X)/5,(_mousePointAfterRelease.Y - _mousePointBeforeRelease.Y)/5);
+            mousePointAfterRelease.X = mouse.X;
+            mousePointAfterRelease.Y = mouse.Y;
+            boxVelocity+= new Vector2((mousePointAfterRelease.X - mousePointBeforeRelease.X)/5,(mousePointAfterRelease.Y - mousePointBeforeRelease.Y)/5);
             mouseHeld = false;
             angularVelocity=0;
             angularAcceleration=0;
@@ -150,22 +150,22 @@ public class BoxObject
 
         if (!isPaused)
         {
-        if (_centreOfBox.Y + _bounds.Height / 2 < window.ClientBounds.Height && !mouseHeld)
+        if (centreOfBox.Y + bounds.Height / 2 < window.ClientBounds.Height && !mouseHeld)
         {
             {
-                forceFromGravity = mass * (gravity)*gravityScale;
+                forceFromGravity = mass * (gravity)*GRAVITY_SCALE;
                 if (affectOfGravity)
                 {
                 boxVelocity.Y += accelerationFromGravity;
             }
             }
-            if (boxVelocity.Y < 0 && (_centreOfBox.Y - _bounds.Height / 2) < 0)
+            if (boxVelocity.Y < 0 && (centreOfBox.Y - bounds.Height / 2) < 0)
             {
                 boxVelocity.Y = 0;
             }
            if (affectOfGravity)
            {
-            _centreOfBox.Y += boxVelocity.Y;
+            centreOfBox.Y += boxVelocity.Y;
            }
         }
         else
@@ -173,11 +173,11 @@ public class BoxObject
             boxVelocity.Y = 0;
         }
 
-        if (_centreOfBox.X + _bounds.Width / 2 < window.ClientBounds.Width &&
-            _centreOfBox.X - _bounds.Width / 2 > 0 &&
+        if (centreOfBox.X + bounds.Width / 2 < window.ClientBounds.Width &&
+            centreOfBox.X - bounds.Width / 2 > 0 &&
             !boxHeld)
         {
-            _centreOfBox.X += boxVelocity.X;
+            centreOfBox.X += boxVelocity.X;
         }
         else
         {
@@ -218,12 +218,12 @@ public class BoxObject
     }
     public void Translate(Vector2 vectorToTranslateBy)
     {
-        _centreOfBox += vectorToTranslateBy;
+        centreOfBox += vectorToTranslateBy;
     }
     public Vector2[] GetCorners()
     {
-        float halfWidth = _bounds.Width *boxScale / 2f;
-        float halfHeight = _bounds.Height *boxScale / 2f;
+        float halfWidth = bounds.Width *BOX_SCALE / 2f;
+        float halfHeight = bounds.Height *BOX_SCALE / 2f;
         float cos = (float)Math.Cos(rotation);
         float sin = (float)Math.Sin(rotation);
 
@@ -237,7 +237,7 @@ public class BoxObject
         Vector2[] worldCorners = new Vector2[4];
         for (int i = 0; i < 4; i++)
         {
-            worldCorners[i] = _centreOfBox + new Vector2(
+            worldCorners[i] = centreOfBox + new Vector2(
                 localCorners[i].X * cos - localCorners[i].Y * sin,
                 localCorners[i].X * sin + localCorners[i].Y * cos 
             );
@@ -249,10 +249,10 @@ public class BoxObject
         get
         {
             return new Rectangle(
-                (int)(_centreOfBox.X - _bounds.Width / 2), //left side
-                (int)(_centreOfBox.Y - _bounds.Height / 2),//top side
-                _bounds.Width, //right side
-                _bounds.Height //bottom side
+                (int)(centreOfBox.X - bounds.Width / 2), //left side
+                (int)(centreOfBox.Y - bounds.Height / 2),//top side
+                bounds.Width, //right side
+                bounds.Height //bottom side
             );
         }
         
@@ -264,12 +264,12 @@ public class BoxObject
          public void Draw(SpriteBatch spriteBatch)
     {
         spriteBatch.Draw(
-            _texture,
-            _centreOfBox,
-            _bounds,
+            texture,
+            centreOfBox,
+            bounds,
             colour,
             rotation,
-            new Vector2(_bounds.Width / 2, _bounds.Height / 2),
+            new Vector2(bounds.Width / 2, bounds.Height / 2),
             1.0f,
             SpriteEffects.None,
             0f

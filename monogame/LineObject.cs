@@ -10,55 +10,55 @@ using monogame;
 namespace monogame;
 public class LineObject
 {  
-    const float scale = 1f;
-    protected Texture2D _texture;
-    protected Vector2 _position;
-    protected Rectangle _bounds;
-    protected float _rotation= 0f;
+    const float SCALE = 1f;
+    protected Texture2D texture;
+    protected Vector2 position;
+    protected Rectangle bounds;
+    protected float rotation= 0f;
     protected Vector2 origin = Vector2.Zero;
-    protected Color _colour;
-    public Vector2 GetPosition() {return _position;}
-    public Rectangle GetBounds() {return _bounds;}
-    public float GetRotation() {return _rotation;}
-    public void SetRotation(float inputRotation) {_rotation = inputRotation;}
+    protected Color colour;
+    public Vector2 GetPosition() {return position;}
+    public Rectangle GetBounds() {return bounds;}
+    public float GetRotation() {return rotation;}
+    public void SetRotation(float inputRotation) {rotation = inputRotation;}
     public Vector2 GetOrigin() {return origin;}
     public void SetOrigin(Vector2 inputOrigin) {origin = inputOrigin;}
 
 
     public LineObject(Texture2D texture, Vector2 position, float rotation, Rectangle sourceRectangle)
     {
-        _texture = texture;
-        _position = position;
-        _bounds = sourceRectangle;
-        _rotation = -MathHelper.ToRadians(rotation);
-        _colour = Color.Black;
+        this.texture = texture;
+        this.position = position;
+        bounds = sourceRectangle;
+        this.rotation = -MathHelper.ToRadians(rotation);
+        colour = Color.Black;
     }
   public void Update(GameWindow window)
     {
          KeyboardState keyboardState = Keyboard.GetState();
          if (keyboardState.IsKeyDown(Keys.O))
         {
-            _rotation +=MathHelper.ToRadians(1f);
+            rotation +=MathHelper.ToRadians(1f);
         }
          if (keyboardState.IsKeyDown(Keys.I))
         {
-            _rotation -=MathHelper.ToRadians(1f);
+            rotation -=MathHelper.ToRadians(1f);
         }
          if (keyboardState.IsKeyDown(Keys.Right))
         {
-         _position.X+=10;
+         position.X+=10;
         }
         if (keyboardState.IsKeyDown(Keys.Left))
         {
-         _position.X-=10;
+         position.X-=10;
         }
         if (keyboardState.IsKeyDown(Keys.Up))
         {
-         _position.Y-=10;
+         position.Y-=10;
         }
         if (keyboardState.IsKeyDown(Keys.Down))
         {
-         _position.Y+=10;
+         position.Y+=10;
         }
     }
 
@@ -67,23 +67,23 @@ public class LineObject
     {
         get
         {
-              float halfWidth = _bounds.Width * scale / 2f;
-              float halfHeight = _bounds.Height * scale / 2f;
+              float halfWidth = bounds.Width * SCALE / 2f;
+              float halfHeight = bounds.Height * SCALE / 2f;
             return new Rectangle(
-                (int)_position.X,
-                (int)_position.Y,
-                (int)(halfWidth * scale),
-                (int)(halfHeight * scale)
+                (int)position.X,
+                (int)position.Y,
+                (int)(halfWidth * SCALE),
+                (int)(halfHeight * SCALE)
             );
         }
     }
 
     public Vector2[] GetCorners()
     {
-        float halfWidth = _bounds.Width * scale / 2f;
-        float halfHeight = _bounds.Height * scale / 2f;
-        float cos = (float)Math.Cos(_rotation);
-        float sin = (float)Math.Sin(_rotation);
+        float halfWidth = bounds.Width * SCALE / 2f;
+        float halfHeight = bounds.Height * SCALE / 2f;
+        float cos = (float)Math.Cos(rotation);
+        float sin = (float)Math.Sin(rotation);
 
         // Local corners relative to origin (center)
         Vector2[] localCorners = new Vector2[]
@@ -94,7 +94,7 @@ public class LineObject
             new Vector2(-halfWidth, halfHeight)
         };
 
-        Vector2 centre = _position;
+        Vector2 centre = position;
         Vector2[] worldCorners = new Vector2[4];
         for (int i = 0; i < 4; i++)
         {
@@ -108,7 +108,7 @@ public class LineObject
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(_texture, _position, _bounds, _colour, _rotation, origin, scale, SpriteEffects.None, 0f);
+        spriteBatch.Draw(texture, position, bounds, colour, rotation, origin, SCALE, SpriteEffects.None, 0f);
     }
      public virtual int GetIndexOfMaterialInMatrix()
         {
@@ -121,7 +121,7 @@ public class LineObject
         public BrassLine(Texture2D texture, Vector2 position, float rotation, Rectangle sourceRectangle) 
         : base(texture, position, rotation, sourceRectangle)
         {
-            _colour = Color.Gold;
+            colour = Color.Gold;
         }
         public override int GetIndexOfMaterialInMatrix()
         {
@@ -133,7 +133,7 @@ public class LineObject
         public CastIronLine(Texture2D texture, Vector2 position, float rotation, Rectangle sourceRectangle) 
         : base(texture, position, rotation, sourceRectangle)
         {
-            _colour = Color.DarkGray;
+            colour = Color.DarkGray;
         }
         public override int GetIndexOfMaterialInMatrix()
         {
@@ -145,7 +145,7 @@ public class LineObject
         public IceLine(Texture2D texture, Vector2 position, float rotation, Rectangle sourceRectangle) 
         : base(texture, position, rotation, sourceRectangle)
         {
-            _colour = Color.LightBlue;
+            colour = Color.LightBlue;
         }
         public override int GetIndexOfMaterialInMatrix()
         {
@@ -157,7 +157,7 @@ public class LineObject
         public SteelLine(Texture2D texture, Vector2 position, float rotation, Rectangle sourceRectangle) 
         : base(texture, position, rotation, sourceRectangle)
         {
-            _colour = Color.Gray;
+            colour = Color.Gray;
         }
         public override int GetIndexOfMaterialInMatrix()
         {
@@ -169,7 +169,7 @@ public class LineObject
         public DefaultLine(Texture2D texture, Vector2 position, float rotation, Rectangle sourceRectangle) 
         : base(texture, position, rotation, sourceRectangle)
         {
-            _colour = Color.Black;
+            colour = Color.Black;
         }
         public override int GetIndexOfMaterialInMatrix()
         {
