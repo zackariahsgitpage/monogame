@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.IO;
@@ -16,7 +15,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.ImGuiNet;
 
+
 namespace monogame;
+
 
 public class Game1 : Game
 {
@@ -34,7 +35,9 @@ public class Game1 : Game
     protected Rectangle[] arrow;
     private float lineRotation;
 
+
     protected SpriteFont _font;
+
 
     protected List<BoxObject> listOfBoxes;
     protected bool keyPressed;
@@ -44,6 +47,8 @@ public class Game1 : Game
     protected bool spacePressed;
     protected bool timerActive;
     protected float messageTimer;
+    protected bool collisionForceActive;
+
 
     public static class SATHelper
     {
@@ -68,6 +73,7 @@ public class Game1 : Game
             {
                 float[] projectionA = ProjectOntoAxis(cornersA, axis);
                 float[] projectionB = ProjectOntoAxis(cornersB, axis);
+
 
                 if (projectionA[1] < projectionB[0] || projectionB[1] < projectionA[0]) // if max of A is less than min of B, definitely not colliding
                 {
@@ -99,6 +105,7 @@ public class Game1 : Game
         public LineSave Line { get; set; }
     }
 
+
     public class BoxSave
     {
         public float CentreOfBoxX { get; set; }
@@ -111,6 +118,7 @@ public class Game1 : Game
         public float VelocityY { get; set; }
         public int MaterialIndex { get; set; }
     }
+
 
     public class LineSave
     {
@@ -170,11 +178,13 @@ public class Game1 : Game
                         _ => new DefaultBox(blackTexture, new Vector2(boxSave.CentreOfBoxX, boxSave.CentreOfBoxY), new Rectangle(0, 0, 100, 100))
                     };
 
+
                     _box.SetRotation(boxSave.Rotation);
                     _box.SetMass(boxSave.Mass);
                     _box.SetCoefficientOfFriction(boxSave.CoefficientOfFriction);
                     _box.SetCustomCoefficientToggle(boxSave.CustomCoefficientToggle);
                     _box.SetBoxVelocity(new Vector2(boxSave.VelocityX, boxSave.VelocityY));
+
 
                     listOfBoxes.Add(_box);
                 }
@@ -199,6 +209,7 @@ public class Game1 : Game
         return saveData;
     }
 
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -206,6 +217,7 @@ public class Game1 : Game
         _graphics.PreferredBackBufferHeight = 800;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+
 
     }
     protected override void Initialize()
@@ -218,6 +230,7 @@ public class Game1 : Game
         isPaused = false;
         base.Initialize();
     }
+
 
     protected override void LoadContent()
     {
@@ -308,6 +321,7 @@ public class Game1 : Game
         MouseState mouse = Mouse.GetState();
         KeyboardState keyboardState = Keyboard.GetState();
 
+
         // Toggle pause with space
         if (keyboardState.IsKeyDown(Keys.Space) && !spacePressed)
         {
@@ -318,6 +332,7 @@ public class Game1 : Game
         {
             spacePressed = false;
         }
+
 
         if (!keyPressed && keyboardState.IsKeyDown(Keys.G))
         {
@@ -348,6 +363,7 @@ public class Game1 : Game
         {
             string path = AppDomain.CurrentDomain.BaseDirectory + "\\saveData\\save0.json";
 
+
             if (File.Exists(path))
             {
                 LoadConfig(0);
@@ -357,6 +373,7 @@ public class Game1 : Game
                 timerActive = true;
                 messageTimer = 3f;
             }
+
 
             keyPressed = true;
         }
@@ -388,7 +405,9 @@ public class Game1 : Game
                 _box.SetCoefficientOfFriction(coefficientsMatrix[_box.GetIndexOfMaterialInMatrix(), _line.GetIndexOfMaterialInMatrix()]);
             }
 
+
             _box.Update(Window, isPaused);
+
 
             if (!isPaused)
             {
@@ -399,6 +418,7 @@ public class Game1 : Game
                 }
                 if (result.IsColliding)
                 {
+                    collisionForceActive = true;
                     Vector2 mtv = result.MTV;
                     if (Vector2.Dot(mtv, _box.GetCentreOfBox() - _line.GetPosition()) < 0)
                     {
@@ -422,7 +442,7 @@ public class Game1 : Game
                     _box.SetNormalReactionForce((float)(_box.GetForceFromGravity() * Math.Abs(Math.Cos(lineRotation))));
                     _box.SetMaxForceFromFriction(_box.GetNormalReactionForce() * _box.GetCoefficientOfFriction());
                     _box.SetVelAlongTangent(Vector2.Dot(_box.GetBoxVelocity(), _box.GetTangent()));
-                    _box.ApplyFriction(lineRotation, DISPLAYED_FORCE_SCALE);
+                    _box.ApplyFriction(lineRotation, DISPLAYED_FORCE_SCALE, _line.GetPosition());
                     Vector2 contactPoint;
                     if (flatOnSurface)
                     {
@@ -432,6 +452,7 @@ public class Game1 : Game
                     {
                         Vector2[] corners = _box.GetCorners();
                         contactPoint = corners[0];
+
 
                         float maxProjection = Vector2.Dot(corners[0], _box.GetNormal());
                         foreach (var corner in corners)
@@ -461,6 +482,7 @@ public class Game1 : Game
                             _box.SetAngularVelocity(_box.GetAngularVelocity() + _box.GetAngularAcceleration());
                         }
 
+
                         _box.SetJustCollided(true);
                     }
                     // stop rotation if the box is nearly aligned with the slope
@@ -476,6 +498,7 @@ public class Game1 : Game
                 }
                 else
                 {
+                    collisionForceActive = false;
                     _box.SetAffectOfGravity(true);
                     _box.SetAngularVelocity(_box.GetAngularVelocity() + _box.GetAngularAcceleration());
                 }
@@ -507,6 +530,8 @@ public class Game1 : Game
                SpriteEffects.None,
                  0f
                  );
+                 if (collisionForceActive)
+                 {
             _spriteBatch.Draw(
             arrowTexture,
             _box.GetCentreOfBox(),
@@ -529,6 +554,7 @@ public class Game1 : Game
                 SpriteEffects.None,
                 0f
             );
+                 }
             _spriteBatch.DrawString(_font, $"{listOfBoxes.IndexOf(_box) + 1}", new Vector2((int)_box.GetCentreOfBox().X - (_box.GetWidth()) / 2 - 10, (int)_box.GetCentreOfBox().Y - _box.GetHeight() / 2 - 20), Color.Black);
             _spriteBatch.DrawString(_font, $"{_box.GetDisplayedForceFromGravity():F2}N", new Vector2((int)_box.GetCentreOfBox().X + 10, (int)(_box.GetCentreOfBox().Y + _box.GetHeight())), Color.Red);
             _spriteBatch.DrawString(_font, $"{_box.GetDisplayedForceFromFriction():F2}N", new Vector2((int)_box.GetCentreOfBox().X - _box.GetWidth(), (int)_box.GetCentreOfBox().Y), Color.Blue);
@@ -544,6 +570,7 @@ public class Game1 : Game
                 timerActive = false;
             }
         }
+
 
         _spriteBatch.End();
         base.Draw(gameTime);
@@ -562,6 +589,7 @@ public class Game1 : Game
                             bool customToggle = _box.GetCustomCoefficientToggle();
                             ImGui.Checkbox("Unlock Coefficient of Friction", ref customToggle);
                             _box.SetCustomCoefficientToggle(customToggle);
+
 
                             ImGui.BeginDisabled(!_box.GetCustomCoefficientToggle());
                             float coeffValue = _box.GetCoefficientOfFriction();
@@ -618,6 +646,7 @@ public class Game1 : Game
                             ImGui.EndMenu();
                         }
 
+
                     }
                     ImGui.EndMenu();
                 }
@@ -628,7 +657,7 @@ public class Game1 : Game
                     ImGui.Text("Move box: Left Click");
                     ImGui.Text("Delete box: Right Click");
                     ImGui.Text("Spawn box: G,H,J,K,L (Brass, Cast Iron, Steel, Ice, None)");
-                    ImGui.Text("Rotate line: O, P");
+                    ImGui.Text("Rotate line: I, O");
                     ImGui.Text("Move line: Arrow keys");
                     ImGui.Text("Pause simulation: Space");
                     ImGui.Text("Quick save slot 1: S");
@@ -650,4 +679,3 @@ public class Game1 : Game
         guiRenderer.EndLayout();
     }
 }
-

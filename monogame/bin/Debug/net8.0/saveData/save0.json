@@ -1,142 +1,21 @@
 {
   "Boxes": [
     {
-      "CentreOfBoxX": 512,
-      "CentreOfBoxY": 971.36615,
-      "Rotation": -0,
+      "CentreOfBoxX": 162,
+      "CentreOfBoxY": 160,
+      "Rotation": 0.45378557,
       "Mass": 1,
-      "CoefficientOfFriction": 0.5,
+      "CoefficientOfFriction": 0.44,
       "CustomCoefficientToggle": false,
       "VelocityX": 0,
-      "VelocityY": 961.36615,
-      "MaterialIndex": 4
-    },
-    {
-      "CentreOfBoxX": 512,
-      "CentreOfBoxY": 910.3677,
-      "Rotation": 0,
-      "Mass": 1,
-      "CoefficientOfFriction": 0.5,
-      "CustomCoefficientToggle": false,
-      "VelocityX": 0,
-      "VelocityY": 450.55133,
-      "MaterialIndex": 1
-    },
-    {
-      "CentreOfBoxX": 512,
-      "CentreOfBoxY": 745.73096,
-      "Rotation": 0,
-      "Mass": 1,
-      "CoefficientOfFriction": 0.5,
-      "CustomCoefficientToggle": false,
-      "VelocityX": 0,
-      "VelocityY": 368.23297,
+      "VelocityY": 0,
       "MaterialIndex": 0
-    },
-    {
-      "CentreOfBoxX": 512,
-      "CentreOfBoxY": 371.6181,
-      "Rotation": 0,
-      "Mass": 1,
-      "CoefficientOfFriction": 0.5,
-      "CustomCoefficientToggle": false,
-      "VelocityX": 0,
-      "VelocityY": 361.6181,
-      "MaterialIndex": 0
-    },
-    {
-      "CentreOfBoxX": 512,
-      "CentreOfBoxY": 339.27875,
-      "Rotation": 0,
-      "Mass": 1,
-      "CoefficientOfFriction": 0.5,
-      "CustomCoefficientToggle": false,
-      "VelocityX": 0,
-      "VelocityY": 329.27875,
-      "MaterialIndex": 0
-    },
-    {
-      "CentreOfBoxX": 512,
-      "CentreOfBoxY": 648.7129,
-      "Rotation": 0,
-      "Mass": 1,
-      "CoefficientOfFriction": 0.5,
-      "CustomCoefficientToggle": false,
-      "VelocityX": 0,
-      "VelocityY": 319.72394,
-      "MaterialIndex": 1
-    },
-    {
-      "CentreOfBoxX": 512,
-      "CentreOfBoxY": 318.69916,
-      "Rotation": 0,
-      "Mass": 1,
-      "CoefficientOfFriction": 0.5,
-      "CustomCoefficientToggle": false,
-      "VelocityX": 0,
-      "VelocityY": 308.69916,
-      "MaterialIndex": 2
-    },
-    {
-      "CentreOfBoxX": 512,
-      "CentreOfBoxY": 616.37354,
-      "Rotation": 0,
-      "Mass": 1,
-      "CoefficientOfFriction": 0.5,
-      "CustomCoefficientToggle": false,
-      "VelocityX": 0,
-      "VelocityY": 303.55426,
-      "MaterialIndex": 2
-    },
-    {
-      "CentreOfBoxX": 512,
-      "CentreOfBoxY": 298.11957,
-      "Rotation": 0,
-      "Mass": 1,
-      "CoefficientOfFriction": 0.5,
-      "CustomCoefficientToggle": false,
-      "VelocityX": 0,
-      "VelocityY": 288.11957,
-      "MaterialIndex": 1
-    },
-    {
-      "CentreOfBoxX": 512,
-      "CentreOfBoxY": 689.1405,
-      "Rotation": 0,
-      "Mass": 1,
-      "CoefficientOfFriction": 0.5,
-      "CustomCoefficientToggle": false,
-      "VelocityX": 0,
-      "VelocityY": 227.11517,
-      "MaterialIndex": 1
-    },
-    {
-      "CentreOfBoxX": 512,
-      "CentreOfBoxY": 662.6805,
-      "Rotation": 0,
-      "Mass": 1,
-      "CoefficientOfFriction": 0.5,
-      "CustomCoefficientToggle": false,
-      "VelocityX": 0,
-      "VelocityY": 218.29517,
-      "MaterialIndex": 0
-    },
-    {
-      "CentreOfBoxX": 512,
-      "CentreOfBoxY": 435.5653,
-      "Rotation": 0,
-      "Mass": 1,
-      "CoefficientOfFriction": 0.5,
-      "CustomCoefficientToggle": false,
-      "VelocityX": 0,
-      "VelocityY": 213.15016,
-      "MaterialIndex": 2
     }
   ],
   "Line": {
-    "PositionX": -100,
+    "PositionX": 430,
     "PositionY": 400,
-    "Rotation": -0,
-    "MaterialIndex": 4
+    "Rotation": 0.45378557,
+    "MaterialIndex": 3
   }
 }

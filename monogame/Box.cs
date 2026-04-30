@@ -181,11 +181,11 @@ public class BoxObject
         }
     
     }
-    public void ApplyFriction(float lineRotation, float displayedFrictionScale)
+    public void ApplyFriction(float lineRotation, float displayedFrictionScale, Vector2 linePosition)
     {
         forceDownSlope = (float)(forceFromGravity * Math.Abs(Math.Sin(lineRotation)));
                     if (forceDownSlope <= maxForceFromFriction && Math.Abs(velAlongTangent) < 0.5f
-                      && boxVelocity.Length() < 1f)
+                      && boxVelocity.Length() < 1f && _centreOfBox.Y < linePosition.Y)
                     {
                         boxVelocity = new Vector2(0f, 0f);
                         affectOfGravity = false; // Disable gravity when friction holds the box  
