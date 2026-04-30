@@ -30,7 +30,6 @@ public class BoxObject
 
     protected float rotation;
     protected bool mouseHeld;
-    protected bool isMoving;
     private float resolvedSpeed;
     protected float normalReactionForce;
     protected float mass;
@@ -100,7 +99,6 @@ public class BoxObject
         gravity = 9.8f;
         mouseHeld = false;
         rotation = 0f;
-        isMoving = false;
         resolvedSpeed = 0;
         normalReactionForce = 0f;
         mass = 1f;
@@ -122,10 +120,6 @@ public class BoxObject
         MouseState mouse = Mouse.GetState();
         resolvedSpeed = boxVelocity.Length();
         centreOfBox = new Vector2(centreOfBox.X, centreOfBox.Y);
-        if (boxVelocity.Y> 0 || boxVelocity.X > 0 || boxVelocity.Length() > 0)
-        { isMoving = true; }
-        else
-        { isMoving = false; }
         if (mouse.LeftButton == ButtonState.Pressed && (BoundingBox.Contains(mouse.Position) || mouseHeld) )
         {
             centreOfBox = mouse.Position.ToVector2();

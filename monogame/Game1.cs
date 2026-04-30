@@ -60,14 +60,14 @@ public class Game1 : Game
             }
             return new float[] { min, max };
         }
-        public static (bool IsColliding, Vector2 MTV) CollisionData(Vector2[] CornersA, Vector2[] CornersB, Vector2[] axesOfNormals)
+        public static (bool IsColliding, Vector2 MTV) CollisionData(Vector2[] cornersA, Vector2[] cornersB, Vector2[] axesOfNormals)
         {
             float smallestOverlap = float.PositiveInfinity;
             Vector2 smallestAxis = Vector2.Zero;
             foreach (var axis in axesOfNormals)
             {
-                float[] projectionA = ProjectOntoAxis(CornersA, axis);
-                float[] projectionB = ProjectOntoAxis(CornersB, axis);
+                float[] projectionA = ProjectOntoAxis(cornersA, axis);
+                float[] projectionB = ProjectOntoAxis(cornersB, axis);
 
                 if (projectionA[1] < projectionB[0] || projectionB[1] < projectionA[0]) // if max of A is less than min of B, definitely not colliding
                 {
@@ -80,7 +80,7 @@ public class Game1 : Game
                     smallestAxis = axis;
                 }
             }
-            Vector2 direction = CornersB[0] - CornersA[0];
+            Vector2 direction = cornersB[0] - cornersA[0];
             if (smallestAxis.LengthSquared() > 0f)
             {
                 if (Vector2.Dot(direction, smallestAxis) < 0)

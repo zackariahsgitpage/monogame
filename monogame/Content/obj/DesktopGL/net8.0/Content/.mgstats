@@ -1,5 +1,5 @@
 Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
-"C:/Users/zack/.vscode/codeForSchool/monogame/monogame/monogame/Content/arrow.png","C:/Users/zack/.vscode/codeForSchool/monogame/monogame/monogame/Content/bin/DesktopGL/Content/arrow.xnb","TextureProcessor","Texture2DContent",44802,6106885,0.5143469
-"C:/Users/zack/.vscode/codeForSchool/monogame/monogame/monogame/Content/blacksquare.jpg","C:/Users/zack/.vscode/codeForSchool/monogame/monogame/monogame/Content/bin/DesktopGL/Content/blacksquare.xnb","TextureProcessor","Texture2DContent",21590,14128577,0.4430211
-"C:/Users/zack/.vscode/codeForSchool/monogame/monogame/monogame/Content/File.spritefont","C:/Users/zack/.vscode/codeForSchool/monogame/monogame/monogame/Content/bin/DesktopGL/Content/File.xnb","FontDescriptionProcessor","SpriteFontContent",2068,21529,0.1226474
-"C:/Users/zack/.vscode/codeForSchool/monogame/monogame/monogame/Content/redarrow.png","C:/Users/zack/.vscode/codeForSchool/monogame/monogame/monogame/Content/bin/DesktopGL/Content/redarrow.xnb","TextureProcessor","Texture2DContent",20483,6106885,0.2876598
+"C:/zacksgitpagerepo/monogame/monogame/Content/arrow.png","C:/zacksgitpagerepo/monogame/monogame/Content/bin/DesktopGL/Content/arrow.xnb","TextureProcessor","Texture2DContent",44802,6106885,0.2619247
+"C:/zacksgitpagerepo/monogame/monogame/Content/blacksquare.jpg","C:/zacksgitpagerepo/monogame/monogame/Content/bin/DesktopGL/Content/blacksquare.xnb","TextureProcessor","Texture2DContent",21590,14128577,0.268238
+"C:/zacksgitpagerepo/monogame/monogame/Content/File.spritefont","C:/zacksgitpagerepo/monogame/monogame/Content/bin/DesktopGL/Content/File.xnb","FontDescriptionProcessor","SpriteFontContent",2068,21529,0.0884817
+"C:/zacksgitpagerepo/monogame/monogame/Content/redarrow.png","C:/zacksgitpagerepo/monogame/monogame/Content/bin/DesktopGL/Content/redarrow.xnb","TextureProcessor","Texture2DContent",20483,6106885,0.137257
